@@ -1,0 +1,51 @@
+@api = http://localhost:3000/api/Projects
+
+GET {{api}}
+
+###
+
+POST {{api}}
+Content-Type: application/json
+
+{
+    "id": "aadcf224-24cd-48d3-9ca0-801109fece02",
+    "title": "Projecto API Node",
+    "subtitle": "Projecto API Node",
+    "src": "img_3",
+    "dateStart": "2022-09-24T00:00:00",
+    "dateEnd": "2022-12-28T00:00:00"
+}
+
+
+###
+
+POST {{api}}
+Content-Type: application/json
+
+{
+    "id": "aadcf224-24cd-48d3-9ca0-801109fece03",
+    "title": "Projecto API Node",
+    "subtitle": "Projecto API Node",
+    "src": "img_3",
+    "dateStart": "2022-09-24T00:00:00",
+    "dateEnd": "2022-12-28T00:00:00"
+}
+
+
+###
+
+DELETE  {{api}}/aadcf224-24cd-48d3-9ca0-801109fece03
+
+###
+
+PUT {{api}}/aadcf224-24cd-48d3-9ca0-801109fece03
+Content-Type: application/json
+
+{
+    "id": "aadcf224-24cd-48d3-9ca0-801109fece03",
+    "title": "Projecto API Node 2",
+    "subtitle": "Projecto API Node 2",
+    "src": "img_3",
+    "dateStart": "2022-09-24T00:00:00",
+    "dateEnd": "2022-12-28T00:00:00"
+}

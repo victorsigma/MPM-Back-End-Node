@@ -1,0 +1,46 @@
+@api = http://localhost:3000/api/Activities
+
+GET {{api}}
+
+###
+
+POST {{api}}
+Content-Type: application/json
+
+{
+    "id": "473618cd-4364-4792-865b-58a68a08c346",
+    "title": "Pruebas API Node",
+    "subtitle": "Pruebas API Node",
+    "src": "img_3",
+    "status": 3,
+    "dateEnd": "2022-12-28T00:00:00",
+    "leader": true,
+    "analyst": false,
+    "designer": true,
+    "programmer": true,
+    "projectId": "490602c6-a115-44ec-9bfb-d1d9b9f476d9"
+}
+
+###
+
+DELETE {{api}}/473618cd-4364-4792-865b-58a68a08c346
+
+
+###
+
+PUT {{api}}/473618cd-4364-4792-865b-58a68a08c346
+Content-Type: application/json
+
+{
+    "id": "473618cd-4364-4792-865b-58a68a08c346",
+    "title": "Pruebas API Node",
+    "subtitle": "Pruebas API Node",
+    "src": "img_3",
+    "status": 2,
+    "dateEnd": "2022-12-28T00:00:00",
+    "leader": true,
+    "analyst": false,
+    "designer": true,
+    "programmer": false,
+    "projectId": "490602c6-a115-44ec-9bfb-d1d9b9f476d9"
+}

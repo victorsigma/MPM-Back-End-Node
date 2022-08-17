@@ -1,0 +1,43 @@
+@api = http://localhost:3000/api/ProjectsHasUser
+
+GET {{api}}
+
+###
+
+POST {{api}}
+Content-Type: application/json
+
+{
+    "Id": 0,
+    "proyectsIdProject": "7f7d7901-399d-487f-a3d9-9f6f9de08ffd",
+    "userIdUser": "70fb7a17-16a4-4e0d-be40-dbbd16ea159d",
+    "rolesIdRol": 1
+}
+
+###
+
+POST {{api}}
+Content-Type: application/json
+
+{
+    "Id": 0,
+    "proyectsIdProject": "7f7d7901-399d-487f-a3d9-9f6f9de08ffd",
+    "userIdUser": "70fb7a17-16a4-4e0d-be40-dbbd16ea159d",
+    "rolesIdRol": 1
+}
+
+###
+
+DELETE  {{api}}/64
+
+###
+
+PUT {{api}}/65
+Content-Type: application/json
+
+{
+    "Id": 65,
+    "proyectsIdProject": "7f7d7901-399d-487f-a3d9-9f6f9de08ffd",
+    "userIdUser": "70fb7a17-16a4-4e0d-be40-dbbd16ea159d",
+    "rolesIdRol": 3
+}
