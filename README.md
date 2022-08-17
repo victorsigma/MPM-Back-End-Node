@@ -22,4 +22,4 @@ Run `npm run build` to build the project. The build artifacts will be stored in 
 
 ## Start project
 
-Run `npm start build` to run the project.
+Run `npm run start` to run the project.
