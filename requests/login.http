@@ -4,6 +4,6 @@ POST {{api}}
 Content-Type: application/json
 
 {
-    "userNameOrEmail": "victorsigma",
+    "userNameOrEmail": "victorossielgaray1@gmail.com",
     "password": "Pato123"
 }

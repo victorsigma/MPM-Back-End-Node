@@ -1,23 +1,19 @@
-import sql from 'mssql';
+import mysql from 'mysql';
 
 const dbSettings = {
-    user: 'Sigma',
-    password: 'montesgaray',
-    server: 'localhost',
-    database: 'MPMDB',
-    options: {
-        encrypt: true,
-        trustServerCertificate: true
-    }
+    user: 'sigma',
+    password: 'linux123',
+    host: 'localhost',
+    database: 'mpmdb'
 }
 
 export async function getConnection() {
     try {
-        const pool = await sql.connect(dbSettings);
+        const pool = mysql.createConnection(dbSettings);
         return pool;
     } catch (error) {
         console.error(error);
     }
 }
 
-export { sql };
+export { mysql };

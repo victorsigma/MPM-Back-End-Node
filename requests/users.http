@@ -21,11 +21,11 @@ POST {{api}}
 Content-Type: application/json
 
 {
-    "userId": "70fb7a17-16a4-4e0d-be40-dbbd16ea159e",
-    "userName": "Sigma2",
-    "password": "U2FsdGVkX19Vo1g5EFxWaNkFeBUB6pnnZPb29kG5dj0=",
+    "userId": "",
+    "userName": "Sigma",
+    "password": "megaman123",
     "userMail": "test2@gmail.com",
-    "phoneNumber": "4181121125"
+    "phoneNumber": "4181121123"
 }
 
 ###

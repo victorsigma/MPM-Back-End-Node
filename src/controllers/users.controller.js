@@ -2,6 +2,7 @@ import { getConnection, sql, querys } from "../database";
 import {v4 as uuidv4} from 'uuid';
 import bcrypt from "bcrypt";
 import jwt  from "jsonwebtoken";
+import { promisify } from 'util';
 
 export const login = async (req, res) => {
     const { userNameOrEmail, password } = req.body
@@ -10,16 +11,18 @@ export const login = async (req, res) => {
 
     try {
         const pool = await getConnection()
+        const query = promisify(pool.query).bind(pool);
 
         const validEmail = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userNameOrEmail)
         let checkUser;
         if(validEmail) {
-            checkUser = await pool.request().input('userMail', sql.VarChar, userNameOrEmail).query(querys.checkEmail);
+            //checkUser = await pool.request().input('userMail', sql.VarChar, userNameOrEmail).query(querys.checkEmail);
+            checkUser = await query(querys.checkEmail, [userNameOrEmail])
         } else {
-            checkUser = await pool.request().input('userName', sql.VarChar, userNameOrEmail).query(querys.checkUserName);
+            checkUser = await query(querys.checkUserName, [userNameOrEmail]);
         }
 
-        const user = checkUser.recordset[0];
+        const user = checkUser[0];
 
         if(checkUser != undefined) {
             bcrypt.compare(password, user.password).then((result) => {
@@ -43,9 +46,8 @@ export const login = async (req, res) => {
 
 
 export const createNewUser = async (req, res) => {
-    const { userId, userName, password, userMail, phoneNumber } = req.body
+    const { userId, userName, password, userMail, phoneNumber } = req.body;
 
-    const data = req.body;
     if (
         userId == null ||
         userName == null ||
@@ -53,78 +55,71 @@ export const createNewUser = async (req, res) => {
         userMail == null ||
         phoneNumber == null
     ) {
-        return res.status(400).json({msg: 'Bad Request'});
+        return res.status(400).json({ msg: 'Bad Request' });
     }
 
     try {
-        const pool = await getConnection();
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        const validEmail = !(/^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userMail))
-        const validUserName = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userName)
-        const validPhoneNumber = `${(parseInt(phoneNumber))}`.length
+        const validEmail = !/^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userMail);
+        const validUserName = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userName);
+        const validPhoneNumber = `${parseInt(phoneNumber)}`.length;
 
-        if(validEmail) return res.status(500).send({'error': 'Correo no valido', 'menssage': 'El correo electronico proporcinado no cumple con las caracteristicas necesarias para ser valido.'});
-        if(validUserName) return res.status(500).send({'error': 'Nombre no valido', 'menssage': 'El nombre de usuario proporcinado no cumple con las caracteristicas necesarias para ser valido.'});
-        if(validPhoneNumber != 10) return res.status(500).send({'error': 'Numero de telefono no valido', 'menssage': 'El numero telefonico proporcinado no cumple con las caracteristicas necesarias para ser valido.'});
+        if (validEmail) return res.status(500).json({ error: 'Correo no válido', message: 'El correo electrónico proporcionado no cumple con las características necesarias para ser válido.' });
+        if (validUserName) return res.status(500).json({ error: 'Nombre no válido', message: 'El nombre de usuario proporcionado no cumple con las características necesarias para ser válido.' });
+        if (validPhoneNumber !== 10) return res.status(500).json({ error: 'Número de teléfono no válido', message: 'El número telefónico proporcionado no cumple con las características necesarias para ser válido.' });
 
-        const checkEmail = await pool.request().input('userMail', sql.VarChar, userMail).query(querys.checkEmail);
-        const checkUserName = await pool.request().input('userName', sql.VarChar, userName).query(querys.checkUserName);
-        const checkPhoneNumber = await pool.request().input('phoneNumber', sql.VarChar, phoneNumber).query(querys.checkPhoneNumber);
+        const [checkEmail] = await queryAsync(querys.checkEmail, [userMail]);
+        const [checkUserName] = await queryAsync(querys.checkUserName, [userName]);
+        const [checkPhoneNumber] = await queryAsync(querys.checkPhoneNumber, [phoneNumber]);
 
-        if(checkEmail.rowsAffected[0] || checkUserName.rowsAffected[0] || checkPhoneNumber.rowsAffected[0]) return res.status(409).send({'error': 'Dato o usuario duplicado', 'menssage': 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.'});
+        if (checkEmail != undefined || checkUserName != undefined || checkPhoneNumber != undefined) {
+            return res.status(409).json({ error: 'Dato o usuario duplicado', message: 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.' });
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await pool.request()
-        .input('userId', sql.VarChar, uuidv4())
-        .input('userName', sql.VarChar, userName)
-        .input('password', sql.VarChar, hashedPassword)
-        .input('userMail', sql.VarChar, userMail)
-        .input('phoneNumber', sql.VarChar, phoneNumber)
-        .query(querys.setUser)
+        await queryAsync(querys.setUser, [uuidv4(), userName, hashedPassword, userMail, phoneNumber]);
 
-        res.json(data);
+        res.json(req.body);
     } catch (error) {
-        res.status(500);
-        res.send(error.message)
+        res.status(500).send(error.message);
     }
-}
+};
 
 export const getUserById = async (req, res) => {
     const { id } = req.params;
     try {
-        const pool = await getConnection();
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        const result = await pool.request()
-        .input('id', id)
-        .query(querys.getUserById);
+        const result = await queryAsync(querys.getUserById, [id]);
 
-        res.json(result.recordset[0]);
+        res.json(result[0]);
     } catch (error) {
-        res.status(500);
-        res.send(error.message)
+        res.status(500).send(error.message);
     }
-}
+};
 
 export const deleteUserById = async (req, res) => {
     const { id } = req.params;
     try {
-        const pool = await getConnection();
-        await pool.request()
-        .input('id', id)
-        .query(querys.deleteUser);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        res.sendStatus(204)
+        await queryAsync(querys.deleteUser, [id]);
+
+        res.sendStatus(204);
     } catch (error) {
-        res.status(500);
-        res.send(error.message)
+        res.status(500).send(error.message);
     }
-}
+};
 
 
 export const updateUserById = async (req, res) => {
-    const { id } = req.params
-    const { userId, userName, password, userMail, phoneNumber } = req.body
+    const { id } = req.params;
+    const { userId, userName, password, userMail, phoneNumber } = req.body;
 
     if (
         userId == null ||
@@ -133,26 +128,19 @@ export const updateUserById = async (req, res) => {
         userMail == null ||
         phoneNumber == null
     ) {
-        return res.status(400).json({msg: 'Bad Request'});
+        return res.status(400).json({ msg: 'Bad Request' });
     }
 
     try {
-        const pool = await getConnection();
-        await pool.request()
-        .input('id', id)
-        .input('userName', sql.VarChar, userName)
-        .input('password', sql.VarChar, password)
-        .input('userMail', sql.VarChar, userMail)
-        .input('phoneNumber', sql.VarChar, phoneNumber)
-        .query(querys.updateUser);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        const result = await pool.request()
-        .input('id', id)
-        .query(querys.getUserById);
+        await queryAsync(querys.updateUser, [userName, password, userMail, phoneNumber, id]);
 
-        res.json(result.recordset[0]);
+        const result = await queryAsync(querys.getUserById, [id]);
+
+        res.json(result[0]);
     } catch (error) {
-        res.status(500);
-        res.send(error.message)
+        res.status(500).send(error.message);
     }
-}
+};
