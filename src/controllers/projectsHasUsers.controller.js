@@ -47,7 +47,6 @@ export const getProjectHasUserById = async (req, res) => {
     const { id } = req.params;
     try {
         const pool = await getConnection();
-
         const result = await pool.request()
         .input('id', id)
         .query(querys.getProjectHasUserById);

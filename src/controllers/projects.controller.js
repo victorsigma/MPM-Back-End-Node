@@ -14,7 +14,7 @@ export const getProjects = async (req, res) => {
 }
 
 export const createNewProject = async (req, res) => {
-    const { id, title, subtitle, src, dateStart, dateEnd } = req.body
+    const { id, title, subtitle, src, dateStart, dateEnd } = req.body;
 
     const data = req.body;
 

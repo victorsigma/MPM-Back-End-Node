@@ -59,4 +59,9 @@ export const querys = {
         userMail = @userMail,
         phoneNumber = @phoneNumber
     WHERE userId = @id`,
+
+
+    checkEmail: 'SELECT * FROM Users WHERE userMail = @userMail',
+    checkUserName: 'SELECT * FROM Users WHERE userName = @userName',
+    checkPhoneNumber: 'SELECT * FROM Users WHERE phoneNumber = @phoneNumber',
 }

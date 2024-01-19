@@ -1,4 +1,4 @@
-@api = http://localhost:3000/api/Users
+@api = http://localhost:3000/api/users
 
 GET {{api}}
 
@@ -8,10 +8,10 @@ POST {{api}}
 Content-Type: application/json
 
 {
-    "userId": "70fb7a17-16a4-4e0d-be40-dbbd16ea159d",
-    "userName": "Sigma",
-    "password": "U2FsdGVkX19Vo1g5EFxWaNkFeBUB6pnnZPb29kG5dj0=",
-    "userMail": "test@gmail.com",
+    "userId": "",
+    "userName": "victorsigma",
+    "password": "Pato123",
+    "userMail": "victorossielgaray1@gmail.com",
     "phoneNumber": "4181121125"
 }
 

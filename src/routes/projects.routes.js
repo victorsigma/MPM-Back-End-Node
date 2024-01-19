@@ -3,15 +3,15 @@ import { createNewProject, getProjects, getProjectById, deleteProjectById, updat
 
 const router = Router();
 
-router.get('/api/Projects', getProjects)
+router.get('/api/projects', getProjects)
 
-router.post('/api/Projects', createNewProject)
+router.post('/api/projects', createNewProject)
 
-router.get('/api/Projects/:id', getProjectById)
+router.get('/api/projects/:id', getProjectById)
 
-router.delete('/api/Projects/:id', deleteProjectById)
+router.delete('/api/projects/:id', deleteProjectById)
 
-router.put('/api/Projects/:Id', updateProjectById)
+router.put('/api/projects/:Id', updateProjectById)
 
 
 export default router;

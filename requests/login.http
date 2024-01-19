@@ -1,0 +1,9 @@
+@api = http://localhost:3000/api/login
+
+POST {{api}}
+Content-Type: application/json
+
+{
+    "userNameOrEmail": "victorsigma",
+    "password": "Pato123"
+}

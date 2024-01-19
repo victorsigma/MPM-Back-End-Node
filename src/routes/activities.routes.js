@@ -3,15 +3,15 @@ import { createNewActivity, getActivities, getActivityById, deleteActivityById, 
 
 const router = Router();
 
-router.get('/api/Activities', getActivities)
+router.get('/api/activities', getActivities)
 
-router.post('/api/Activities', createNewActivity)
+router.post('/api/activities', createNewActivity)
 
-router.get('/api/Activities/:id', getActivityById)
+router.get('/api/activities/:id', getActivityById)
 
-router.delete('/api/Activities/:id', deleteActivityById)
+router.delete('/api/activities/:id', deleteActivityById)
 
-router.put('/api/Activities/:Id', updateActivityById)
+router.put('/api/activities/:Id', updateActivityById)
 
 
 export default router;
