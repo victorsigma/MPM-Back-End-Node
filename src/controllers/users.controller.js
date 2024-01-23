@@ -1,4 +1,4 @@
-import { getConnection, sql, querys } from "../database";
+import { getConnection, querys } from "../database";
 import {v4 as uuidv4} from 'uuid';
 import bcrypt from "bcrypt";
 import jwt  from "jsonwebtoken";
@@ -27,13 +27,14 @@ export const login = async (req, res) => {
         if(checkUser != undefined) {
             bcrypt.compare(password, user.password).then((result) => {
                 if(result) {
-                    const token = jwt.sign({
+                    jwt.sign({
                         userName: user.userName,
                         userMail: user.userMail,
                         phoneNumber: user.phoneNumber
 
-                    }, '77767b40-fedc-11ec-b939-0242ac120002')
-                    res.json({ token })
+                    }, '77767b40-fedc-11ec-b939-0242ac120002', { expiresIn: '24h' }, (err, token) => {
+                        res.json({ token })
+                    })
                 } else {
                     res.json({ msg: 'Incorrect password' })
                 }
@@ -42,6 +43,13 @@ export const login = async (req, res) => {
     } catch (error) {
         res.status(500).send(error.message);
     }
+}
+
+export const verifyLogin = async (req, res) => {
+    jwt.verify(req.token, "77767b40-fedc-11ec-b939-0242ac120002", (error, authData) => {
+        if (error) return res.json({value: false});
+        res.json({value: true})
+    })
 }
 
 
@@ -115,7 +123,6 @@ export const deleteUserById = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
-
 
 export const updateUserById = async (req, res) => {
     const { id } = req.params;

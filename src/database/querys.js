@@ -1,12 +1,16 @@
 export const querys = {
-    getProjects: 'SELECT * FROM Projects',
+    getProjects: 
+    `SELECT p.*
+    FROM projects p JOIN projectsHasUsers pu ON p.id = pu.proyectsIdProject
+        JOIN users u ON u.userId = pu.userIdUser
+    WHERE u.userId = ?`,
     getActivities: 'SELECT * FROM Activities',
     getProjectsHasUsers: 'SELECT * FROM ProjectsHasUsers',
     getUsers: 'SELECT * FROM Users',
 
-    setProject: 'INSERT INTO Projects SET id = ?, title = ?, subtitle = ?, src = ?, dateStart = ?, dateEnd = ?',
+    setProject: 'INSERT INTO Projects SET id = ?, title = ?, subtitle = ?, src = ?, dateStart = ?, dateEnd = ?, owner = ?',
     setActivity: 'INSERT INTO Activities SET id = ?, title = ?, subtitle = ?, src = ?, status = ?, dateEnd = ?, leader = ?, analyst = ?, designer = ?, programmer = ?, projectId = ?',
-    setProjectHasUser: 'INSERT INTO ProjectsHasUsers SET proyectsIdProject = ?, userIdUser = ?, rolesIdRol = ?',
+    setProjectHasUser: 'INSERT INTO ProjectsHasUsers SET proyectsIdProject = ?, userIdUser = ?, idRol = ?',
     setUser: 'INSERT INTO Users SET userId = ?, userName = ?, password = ?, userMail = ?, phoneNumber = ?',
 
     getLastProjectsHasUsers: 'SELECT * FROM ProjectsHasUsers ORDER BY Id DESC LIMIT 1',

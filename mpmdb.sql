@@ -38,7 +38,8 @@ CREATE TABLE `activities` (
   `analyst` bit(1) NOT NULL,
   `designer` bit(1) NOT NULL,
   `programmer` bit(1) NOT NULL,
-  `projectId` text NOT NULL
+  `projectId` varchar(450) NOT NULL,
+  CONSTRAINT FK_Project FOREIGN KEY (`projectId`) REFERENCES projects(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -62,12 +63,10 @@ CREATE TABLE `projects` (
 -- Estructura de tabla para la tabla `projectshasusers`
 --
 
-CREATE TABLE `projectshasusers` (
-  `Id` int(11) NOT NULL,
-  `proyectsIdProject` text NOT NULL,
-  `userIdUser` text NOT NULL,
-  `rolesIdRol` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+
 
 -- --------------------------------------------------------
 
@@ -82,13 +81,34 @@ CREATE TABLE `users` (
   `userMail` text NOT NULL,
   `phoneNumber` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 --
 -- Volcado de datos para la tabla `users`
 --
 
+CREATE TABLE `rols` (
+  `Id` int(11) NOT NULL,
+  `proyectsIdProject` varchar(450) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
+CREATE TABLE `projectsHasUsers` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `proyectsIdProject` varchar(450) NOT NULL,
+  `userIdUser` varchar(450) NOT NULL,
+  `idRol` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `rols`
+  ADD PRIMARY KEY (`id`);
+
+
+ALTER TABLE `projectshasusers`
+  ADD CONSTRAINT FK_Project FOREIGN KEY (`proyectsIdProject`) REFERENCES projects(`id`) ON DELETE CASCADE;
+ALTER TABLE `projectshasusers`
+  ADD CONSTRAINT FK_User FOREIGN KEY (`userIdUser`) REFERENCES users(`userId`) ON DELETE CASCADE;
+ALTER TABLE `projectshasusers`
+  ADD CONSTRAINT FK_Rol FOREIGN KEY (`idRol`) REFERENCES rols(`id`) ON DELETE CASCADE;
+  
 --
 -- Índices para tablas volcadas
 --
@@ -117,6 +137,12 @@ ALTER TABLE `projectshasusers`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`userId`);
 
+ALTER TABLE `projects` 
+  ADD `owner` VARCHAR(450) NOT NULL AFTER `dateEnd`;
+
+ALTER TABLE `projects`
+  ADD CONSTRAINT FK_Owner FOREIGN KEY (`owner`) REFERENCES users(`userId`) ON DELETE CASCADE;
+
 --
 -- AUTO_INCREMENT de las tablas volcadas
 --
@@ -124,8 +150,6 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT de la tabla `projectshasusers`
 --
-ALTER TABLE `projectshasusers`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
@@ -135,3 +159,5 @@ COMMIT;
 INSERT INTO `users` (`userId`, `userName`, `password`, `userMail`, `phoneNumber`) VALUES
 ('4e2c2e1c-0808-4ed3-aaeb-f7133aed9d5b', 'Sigma', '$2b$10$SN/vVAcvwGHzyjuM2R/P8emWQIfymjv.L4otIAaeaXr0ML4zNvHV2', 'test2@gmail.com', '4181121123'),
 ('59c5d536-7f75-47d3-b774-191819093733', 'victorsigma', '$2b$10$lIYFnpA4IswZ1eDz6uZyUe91mQsIr2DFV7vvMn/HId9UBNXc9wCSW', 'victorossielgaray1@gmail.com', '4181121125');
+
+INSERT INTO `rols` (`id`, `rolName`) VALUES (0, 'leader'), (1, 'analyst'), (2, 'designer'), (3, 'programmer');
