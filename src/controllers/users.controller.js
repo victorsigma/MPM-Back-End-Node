@@ -36,7 +36,7 @@ export const login = async (req, res) => {
                         res.json({ token })
                     })
                 } else {
-                    res.json({ msg: 'Incorrect password' })
+                    res.status(500).json({ msg: 'Incorrect data' })
                 }
             })
         }

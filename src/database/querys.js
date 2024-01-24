@@ -15,7 +15,18 @@ export const querys = {
 
     getLastProjectsHasUsers: 'SELECT * FROM ProjectsHasUsers ORDER BY Id DESC LIMIT 1',
 
-    getProjectById: 'SELECT * FROM Projects WHERE id = ?',
+    getProjectById: 
+    `SELECT p.*
+    FROM projects p JOIN projectsHasUsers pu ON p.id = pu.proyectsIdProject
+        JOIN users u ON u.userId = pu.userIdUser
+    WHERE u.userId = ? AND p.id = ?`,
+
+    getProjectUserRol: 
+    `SELECT pu.idRol
+    FROM projects p JOIN projectsHasUsers pu ON p.id = pu.proyectsIdProject
+        JOIN users u ON u.userId = pu.userIdUser
+    WHERE u.userId = ? AND p.id = ?`,
+
     getActivityById: 'SELECT * FROM Activities WHERE id = ?',
     getProjectHasUserById: 'SELECT * FROM ProjectsHasUsers WHERE Id = ?',
     getUserById: 'SELECT * FROM Users WHERE userId = ?',

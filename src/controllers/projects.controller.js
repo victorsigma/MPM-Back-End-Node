@@ -8,10 +8,7 @@ export const createNewProject = async (req, res) => {
     const { title, subtitle, src, dateStart, dateEnd } = req.body;
 
     const token = jwt.decode(req.token, { complete: true })
-    /*      id: 0,
-      proyectsIdProject: this.project.id,
-      userIdUser: '',
-      rolesIdRol: 0*/
+
     if (
         title == null ||
         subtitle == null ||
@@ -62,17 +59,27 @@ export const getProjects = async (req, res) => {
 
 export const getProjectById = async (req, res) => {
     const { id } = req.params;
+
+    const token = jwt.decode(req.token, { complete: true })
+    
     try {
-        const pool = await getConnection();
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        const result = await pool.request()
-        .input('id', id)
-        .query(querys.getProjectById);
+        const user = await queryAsync(querys.checkUserName, [token.payload.userName])
 
-        res.json(result.recordset[0]);
+        const project = await queryAsync(querys.getProjectById, [user[0].userId, id]);
+
+        if(project.length === 0) return res.status(500).send(error.message);
+
+        const rolId = await queryAsync(querys.getProjectUserRol, [user[0].userId, id]);
+
+        const result = {rol: rolId[0], project: project[0]}
+        
+
+        res.json(result);
     } catch (error) {
-        res.status(500);
-        res.send(error.message)
+        res.status(500).send(error.message)
     }
 }
 

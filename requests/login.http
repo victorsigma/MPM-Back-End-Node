@@ -7,3 +7,13 @@ Content-Type: application/json
     "userNameOrEmail": "victorossielgaray1@gmail.com",
     "password": "Pato123"
 }
+
+###
+
+POST {{api}}
+Content-Type: application/json
+
+{
+    "userNameOrEmail": "test2@gmail.com",
+    "password": "megaman123"
+}
