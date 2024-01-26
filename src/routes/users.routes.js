@@ -13,7 +13,9 @@ router.delete('/api/Users/:id', deleteUserById)
 
 router.put('/api/Users/:id', updateUserById)
 
-router.post('/api/login', login)
+router.post('/api/Login', login)
+
+
 
 
 export default router;

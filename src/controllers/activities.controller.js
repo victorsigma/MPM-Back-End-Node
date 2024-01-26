@@ -1,20 +1,49 @@
 import { getConnection, sql, querys } from "../database"
+import {v4 as uuidv4} from 'uuid';
+import { promisify } from 'util';
 
 export const getActivities = async (req, res) => {
+    const project = req.query.project;
+    const status = req.query.status;
+    
+    if (
+        project == undefined ||
+        status == undefined
+    ) {
+        return res.status(400).json({msg: 'Bad Request'});
+    }
+
     try {
-        const pool = await getConnection();
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
+        if(status == 'all') {
+            const result = await queryAsync(querys.getActivities, [project]);
+    
+            return res.json(result);
+        }
+        const result = await queryAsync(querys.getActivitiesStatus, [project, status]);
 
-        const result = await pool.request().query(querys.getActivities);
-
-        res.json(result.recordset);
+        return res.json(result);
     } catch (error) {
-        res.status(500);
-        res.send(error.message)
+        console.log(error)
+        res.status(500).send(error.message)
+    }
+}
+
+export const getActivitiesStatus = async (req, res) => {
+    try {
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
+        const result = await queryAsync(querys.getActivitiesStatusTypes);
+
+        return res.json(result);
+    } catch (error) {
+        res.status(500).send(error.message)
     }
 }
 
 export const createNewActivity = async (req, res) => {
-    const { id, title, subtitle, src, status, dateEnd, leader, analyst, designer, programmer, projectId } = req.body
+    const { id, title, subtitle, src, status, dateEnd, leader, analyst, designer, programmer, projectId } = req.body;
 
     const data = req.body;
     if (
@@ -30,32 +59,21 @@ export const createNewActivity = async (req, res) => {
         programmer == null ||
         projectId == null
     ) {
-        return res.status(400).json({msg: 'Bad Request'});
+        return res.status(400).json({ msg: 'Bad Request' });
     }
 
     try {
-        const pool = await getConnection();
+        const connection = await getConnection();
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        await pool.request()
-        .input('id', sql.VarChar, id)
-        .input('title', sql.VarChar, title)
-        .input('subtitle', sql.VarChar, subtitle)
-        .input('src', sql.VarChar, src)
-        .input('status', sql.Int, status)
-        .input('dateEnd', sql.DateTime2, dateEnd)
-        .input('Leader', sql.Bit, leader)
-        .input('Analyst', sql.Bit, analyst)
-        .input('Designer', sql.Bit, designer)
-        .input('Programmer', sql.Bit, programmer)
-        .input('projectId', sql.VarChar, projectId)
-        .query(querys.setActivity)
+        await queryAsync(querys.setActivity, [uuidv4(), title, subtitle, src, status, dateEnd, leader, analyst, designer, programmer, projectId]);
 
         res.json(data);
     } catch (error) {
-        res.status(500);
-        res.send(error.message)
+        res.status(500).send(error.message);
     }
-}
+};
+
 
 export const getActivityById = async (req, res) => {
     const { id } = req.params;

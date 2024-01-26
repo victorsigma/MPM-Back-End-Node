@@ -4,7 +4,9 @@ export const querys = {
     FROM projects p JOIN projectsHasUsers pu ON p.id = pu.proyectsIdProject
         JOIN users u ON u.userId = pu.userIdUser
     WHERE u.userId = ?`,
-    getActivities: 'SELECT * FROM Activities',
+    getActivities: 'SELECT * FROM Activities WHERE projectId = ?',
+    getActivitiesStatus: 'SELECT * FROM Activities WHERE projectId = ? AND status = ?',
+    getActivitiesStatusTypes: 'SELECT * FROM ActivityStatus',
     getProjectsHasUsers: 'SELECT * FROM ProjectsHasUsers',
     getUsers: 'SELECT * FROM Users',
 

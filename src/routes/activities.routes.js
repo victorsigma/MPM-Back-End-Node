@@ -1,17 +1,20 @@
 import { Router } from 'express';
-import { createNewActivity, getActivities, getActivityById, deleteActivityById, updateActivityById } from '../controllers/activities.controller';
+import { verifyToken } from "../libs/verification";
+import { createNewActivity, getActivities, getActivityById, getActivitiesStatus, deleteActivityById, updateActivityById } from '../controllers/activities.controller';
 
 const router = Router();
 
-router.get('/api/activities', getActivities)
+router.get('/api/activities', verifyToken, getActivities)
 
-router.post('/api/activities', createNewActivity)
+router.post('/api/activities', verifyToken, createNewActivity)
 
-router.get('/api/activities/:id', getActivityById)
+router.get('/api/activities/:id', verifyToken, getActivityById)
 
-router.delete('/api/activities/:id', deleteActivityById)
+router.get('/api/activities-status/', verifyToken, getActivitiesStatus)
 
-router.put('/api/activities/:Id', updateActivityById)
+router.delete('/api/activities/:id', verifyToken, deleteActivityById)
+
+router.put('/api/activities/:Id', verifyToken, updateActivityById)
 
 
 export default router;

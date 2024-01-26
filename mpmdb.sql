@@ -98,6 +98,11 @@ CREATE TABLE `projectsHasUsers` (
   `idRol` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `activityStatus` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `statusName` varchar(450) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 ALTER TABLE `rols`
   ADD PRIMARY KEY (`id`);
 
@@ -142,6 +147,13 @@ ALTER TABLE `projects`
 
 ALTER TABLE `projects`
   ADD CONSTRAINT FK_Owner FOREIGN KEY (`owner`) REFERENCES users(`userId`) ON DELETE CASCADE;
+
+CREATE TABLE `activityStatus` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `statusName` varchar(450) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+ALTER TABLE `activities`
+  ADD CONSTRAINT FK_Status FOREIGN KEY (`status`) REFERENCES activityStatus(`Id`) ON DELETE CASCADE;
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
