@@ -1,17 +1,18 @@
 import { Router } from 'express';
+import { verifyToken } from "../libs/verification";
 import { createNewProjectHasUser, getProjectsHasUsers, getProjectHasUserById, deleteProjectHasUserById, updateProjectHasUserById } from '../controllers/projectsHasUsers.controller';
 
 const router = Router();
 
-router.get('/api/projectsHasUser', getProjectsHasUsers)
+router.get('/api/projectsHasUser', verifyToken, getProjectsHasUsers)
 
-router.post('/api/projectsHasUser', createNewProjectHasUser)
+router.post('/api/projectsHasUser', verifyToken, createNewProjectHasUser)
 
-router.get('/api/projectsHasUser/:id', getProjectHasUserById)
+router.get('/api/projectsHasUser/:id', verifyToken, getProjectHasUserById)
 
-router.delete('/api/projectsHasUser/:id', deleteProjectHasUserById)
+router.delete('/api/projectsHasUser', verifyToken, deleteProjectHasUserById)
 
-router.put('/api/projectsHasUser/:id', updateProjectHasUserById)
+router.put('/api/projectsHasUser/:id', verifyToken, updateProjectHasUserById)
 
 
 export default router;

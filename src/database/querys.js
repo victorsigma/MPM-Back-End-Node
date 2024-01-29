@@ -4,11 +4,16 @@ export const querys = {
     FROM projects p JOIN projectsHasUsers pu ON p.id = pu.proyectsIdProject
         JOIN users u ON u.userId = pu.userIdUser
     WHERE u.userId = ?`,
-    getActivities: 'SELECT * FROM Activities WHERE projectId = ?',
-    getActivitiesStatus: 'SELECT * FROM Activities WHERE projectId = ? AND status = ?',
+    getActivities: 'SELECT * FROM Activities WHERE projectId = ? AND ?? = ?',
+    getActivitiesStatus: 'SELECT * FROM Activities WHERE projectId = ? AND status = ? AND ?? = ?',
     getActivitiesStatusTypes: 'SELECT * FROM ActivityStatus',
-    getProjectsHasUsers: 'SELECT * FROM ProjectsHasUsers',
+    getProjectsHasUsers: 
+    `SELECT u.userName, r.rolName
+    FROM ProjectsHasUsers pu JOIN users u ON u.userId = pu.userIdUser JOIN rols r ON r.Id = pu.idRol
+    WHERE pu.proyectsIdProject = ?
+    ORDER BY pu.idRol;`,
     getUsers: 'SELECT * FROM Users',
+    getRol: 'SELECT rolName	FROM Rols WHERE Id = ?',
 
     setProject: 'INSERT INTO Projects SET id = ?, title = ?, subtitle = ?, src = ?, dateStart = ?, dateEnd = ?, owner = ?',
     setActivity: 'INSERT INTO Activities SET id = ?, title = ?, subtitle = ?, src = ?, status = ?, dateEnd = ?, leader = ?, analyst = ?, designer = ?, programmer = ?, projectId = ?',
@@ -35,7 +40,7 @@ export const querys = {
 
     deleteProject: 'DELETE FROM Projects WHERE id = ?',
     deleteActivity: 'DELETE FROM Activities WHERE id = ?',
-    deleteProjectHasUser: 'DELETE FROM ProjectsHasUsers WHERE Id = ?',
+    deleteProjectHasUser: 'DELETE FROM ProjectsHasUsers WHERE userIdUser = ? AND proyectsIdProject = ?',
     deleteUser: 'DELETE FROM Users WHERE userId = ?',
 
     updateProject: 

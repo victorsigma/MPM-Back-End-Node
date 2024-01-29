@@ -10,16 +10,16 @@ export const login = async (req, res) => {
     if( userNameOrEmail == null || password == null) return res.status(400).send({msg: 'Bad Request'});
 
     try {
-        const pool = await getConnection()
-        const query = promisify(pool.query).bind(pool);
+        const pool = await getConnection();
+        const queryAsync = promisify(pool.query).bind(pool);
 
         const validEmail = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userNameOrEmail)
         let checkUser;
         if(validEmail) {
             //checkUser = await pool.request().input('userMail', sql.VarChar, userNameOrEmail).query(querys.checkEmail);
-            checkUser = await query(querys.checkEmail, [userNameOrEmail])
+            checkUser = await queryAsync(querys.checkEmail, [userNameOrEmail])
         } else {
-            checkUser = await query(querys.checkUserName, [userNameOrEmail]);
+            checkUser = await queryAsync(querys.checkUserName, [userNameOrEmail]);
         }
 
         const user = checkUser[0];

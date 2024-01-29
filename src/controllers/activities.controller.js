@@ -1,11 +1,13 @@
 import { getConnection, sql, querys } from "../database"
 import {v4 as uuidv4} from 'uuid';
 import { promisify } from 'util';
+import jwt  from "jsonwebtoken";
 
 export const getActivities = async (req, res) => {
     const project = req.query.project;
     const status = req.query.status;
-    
+    const token = jwt.decode(req.token, { complete: true })
+
     if (
         project == undefined ||
         status == undefined
@@ -16,12 +18,19 @@ export const getActivities = async (req, res) => {
     try {
         const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
         const queryAsync = promisify(connection.query).bind(connection);
+
+        const user = await queryAsync(querys.checkUserName, [token.payload.userName])
+
+        const rolId = await queryAsync(querys.getProjectUserRol, [user[0].userId, project]);
+
+        const rol = await queryAsync(querys.getRol, [rolId[0].idRol])
+
         if(status == 'all') {
-            const result = await queryAsync(querys.getActivities, [project]);
+            const result = await queryAsync(querys.getActivities, [project, rol[0].rolName, 1]);
     
             return res.json(result);
         }
-        const result = await queryAsync(querys.getActivitiesStatus, [project, status]);
+        const result = await queryAsync(querys.getActivitiesStatus, [project, status, rol[0].rolName, 1]);
 
         return res.json(result);
     } catch (error) {

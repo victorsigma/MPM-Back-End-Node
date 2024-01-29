@@ -1,12 +1,16 @@
 import { getConnection, sql, querys } from "../database"
+import { promisify } from 'util';
 
 export const getProjectsHasUsers = async (req, res) => {
+    const project = req.query.project;
+
     try {
-        const pool = await getConnection();
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        const result = await pool.request().query(querys.getProjectsHasUsers);
+        const result = await queryAsync(querys.getProjectsHasUsers, [project]);
 
-        res.json(result.recordset);
+        res.json(result);
     } catch (error) {
         res.status(500);
         res.send(error.message)
@@ -14,42 +18,53 @@ export const getProjectsHasUsers = async (req, res) => {
 }
 
 export const createNewProjectHasUser = async (req, res) => {
-    const { Id, proyectsIdProject, userIdUser, rolesIdRol } = req.body
+    const { idProject, userNameOrEmail, idRol } = req.body
 
     //console.log( Id, proyectsIdProject, userIdUser, rolesIdRol )
     if (
-        proyectsIdProject == null ||
-        userIdUser == null ||
-        rolesIdRol == null
+        idProject == null ||
+        userNameOrEmail == null ||
+        idRol == null
     ) {
         return res.status(400).json({msg: 'Bad Request'});
     }
 
     try {
-        const pool = await getConnection();
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        await pool.request()
-        .input('proyectsIdProject', sql.VarChar, proyectsIdProject)
-        .input('userIdUser', sql.VarChar, userIdUser)
-        .input('rolesIdRol', sql.Int, rolesIdRol)
-        .query(querys.setProjectHasUser)
+        const validEmail = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userNameOrEmail)
+        let checkUser;
+        if(validEmail) {
+            //checkUser = await pool.request().input('userMail', sql.VarChar, userNameOrEmail).query(querys.checkEmail);
+            checkUser = await queryAsync(querys.checkEmail, [userNameOrEmail])
+        } else {
+            checkUser = await queryAsync(querys.checkUserName, [userNameOrEmail]);
+        }
 
-        const data = await pool.request().query(querys.getLastProjectsHasUsers)
+        if(checkUser[0] != undefined) {
+            await queryAsync(querys.setProjectHasUser, [idProject, checkUser[0].userId , idRol])
+            const data = await queryAsync(querys.getLastProjectsHasUsers)
 
-        res.json(data.recordset[0]);
+            res.json(data[0]);
+        } else {
+            res.status(404).send({msj: 'Not Found'})
+        }
+        
     } catch (error) {
-        res.status(500);
-        res.send(error.message)
+        res.status(500).send(error.message)
     }
 }
 
 export const getProjectHasUserById = async (req, res) => {
     const { id } = req.params;
+    const project = req.query.project;
+
     try {
-        const pool = await getConnection();
-        const result = await pool.request()
-        .input('id', id)
-        .query(querys.getProjectHasUserById);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
+
+        const result = await queryAsync(querys.getProjectHasUserById, [id, project]);
 
         res.json(result.recordset[0]);
     } catch (error) {
@@ -60,12 +75,15 @@ export const getProjectHasUserById = async (req, res) => {
 
 
 export const deleteProjectHasUserById = async (req, res) => {
-    const { id } = req.params;
+    const user = req.query.user;
+    const project = req.query.project;
     try {
-        const pool = await getConnection();
-        await pool.request()
-        .input('id', id)
-        .query(querys.deleteProjectHasUser);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
+
+        const checkUser = await queryAsync(querys.checkUserName, [user]);
+
+        await queryAsync(querys.deleteProjectHasUser, [checkUser[0].userId, project]);
 
         res.sendStatus(204)
     } catch (error) {
