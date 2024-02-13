@@ -30,7 +30,8 @@ export const login = async (req, res) => {
                     jwt.sign({
                         userName: user.userName,
                         userMail: user.userMail,
-                        phoneNumber: user.phoneNumber
+                        phoneNumber: user.phoneNumber,
+                        userIcon: user.userIcon
 
                     }, '77767b40-fedc-11ec-b939-0242ac120002', { expiresIn: '24h' }, (err, token) => {
                         res.json({ token })

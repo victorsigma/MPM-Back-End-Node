@@ -41,14 +41,18 @@ export const createNewProjectHasUser = async (req, res) => {
         } else {
             checkUser = await queryAsync(querys.checkUserName, [userNameOrEmail]);
         }
+        
 
         if(checkUser[0] != undefined) {
+            const checkMember = await queryAsync(querys.checkRol, [checkUser[0].userId, idProject])
+
+            if(checkMember[0] != undefined) return res.sendStatus(400)
             await queryAsync(querys.setProjectHasUser, [idProject, checkUser[0].userId , idRol])
             const data = await queryAsync(querys.getLastProjectsHasUsers)
 
-            res.json(data[0]);
+            return res.json(data[0]);
         } else {
-            res.status(404).send({msj: 'Not Found'})
+            return res.status(404).send({msj: 'Not Found'})
         }
         
     } catch (error) {
@@ -83,9 +87,12 @@ export const deleteProjectHasUserById = async (req, res) => {
 
         const checkUser = await queryAsync(querys.checkUserName, [user]);
 
-        await queryAsync(querys.deleteProjectHasUser, [checkUser[0].userId, project]);
+        const checkRol = await queryAsync(querys.checkRol, [checkUser[0].userId, project]);
 
-        res.sendStatus(204)
+        if(checkRol[0].idRol == 0) return res.sendStatus(400)
+        
+        await queryAsync(querys.deleteProjectHasUser, [checkUser[0].userId, project]);
+        return res.sendStatus(204)
     } catch (error) {
         res.status(500);
         res.send(error.message)

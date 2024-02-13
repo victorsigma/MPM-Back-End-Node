@@ -8,7 +8,7 @@ export const querys = {
     getActivitiesStatus: 'SELECT * FROM Activities WHERE projectId = ? AND status = ? AND ?? = ?',
     getActivitiesStatusTypes: 'SELECT * FROM ActivityStatus',
     getProjectsHasUsers: 
-    `SELECT u.userName, r.rolName
+    `SELECT u.userName, u.userIcon, r.rolName
     FROM ProjectsHasUsers pu JOIN users u ON u.userId = pu.userIdUser JOIN rols r ON r.Id = pu.idRol
     WHERE pu.proyectsIdProject = ?
     ORDER BY pu.idRol;`,
@@ -83,6 +83,8 @@ export const querys = {
     checkEmail: 'SELECT * FROM Users WHERE userMail = ?',
     checkUserName: 'SELECT * FROM Users WHERE userName = ?',
     checkPhoneNumber: 'SELECT * FROM Users WHERE phoneNumber = ?',
+
+    checkRol: 'SELECT * FROM projectsHasUsers WHERE userIdUser = ? AND proyectsIdProject = ?'
 }
 
 
