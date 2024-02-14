@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createNewUser, getUserById, deleteUserById, updateUserById, login } from '../controllers/users.controller';
+import { createNewUser, getUserById, deleteUserById, updateUserById, login, verifyLogin } from '../controllers/users.controller';
 
 const router = Router();
 
@@ -14,6 +14,8 @@ router.delete('/api/Users/:id', deleteUserById)
 router.put('/api/Users/:id', updateUserById)
 
 router.post('/api/Login', login)
+
+router.post('/api/verifyLogin', verifyLogin)
 
 
 

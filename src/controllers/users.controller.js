@@ -61,7 +61,7 @@ export const login = async (req, res) => {
 }
 
 export const verifyLogin = async (req, res) => {
-    jwt.verify(req.token, "77767b40-fedc-11ec-b939-0242ac120002", (error, authData) => {
+    jwt.verify(req.body.token, "77767b40-fedc-11ec-b939-0242ac120002", (error, authData) => {
         if (error) return res.json({value: false});
         res.json({value: true})
     })
