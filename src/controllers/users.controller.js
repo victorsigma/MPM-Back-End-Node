@@ -6,6 +6,7 @@ import { promisify } from 'util';
 
 export const login = async (req, res) => {
     const { userNameOrEmail, password } = req.body
+    const isRemember = req.query.remember == 'true' ? true : false;
 
     if( userNameOrEmail == null || password == null) return res.status(400).send({msg: 'Bad Request'});
 
@@ -27,15 +28,28 @@ export const login = async (req, res) => {
         if(checkUser != undefined) {
             bcrypt.compare(password, user.password).then((result) => {
                 if(result) {
-                    jwt.sign({
-                        userName: user.userName,
-                        userMail: user.userMail,
-                        phoneNumber: user.phoneNumber,
-                        userIcon: user.userIcon
-
-                    }, '77767b40-fedc-11ec-b939-0242ac120002', { expiresIn: '24h' }, (err, token) => {
-                        res.json({ token })
-                    })
+                    if(!isRemember) {
+                        jwt.sign({
+                            userName: user.userName,
+                            userMail: user.userMail,
+                            phoneNumber: user.phoneNumber,
+                            userIcon: user.userIcon
+    
+                        }, '77767b40-fedc-11ec-b939-0242ac120002', { expiresIn: '24h' }, (err, token) => {
+                            res.json({ token })
+                        })
+                    }
+                    else {
+                        jwt.sign({
+                            userName: user.userName,
+                            userMail: user.userMail,
+                            phoneNumber: user.phoneNumber,
+                            userIcon: user.userIcon
+    
+                        }, '77767b40-fedc-11ec-b939-0242ac120002', { expiresIn: '30d' }, (err, token) => {
+                            res.json({ token })
+                        })
+                    }
                 } else {
                     res.status(500).json({ msg: 'Incorrect data' })
                 }
