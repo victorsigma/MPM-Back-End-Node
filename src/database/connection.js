@@ -1,10 +1,14 @@
 import mysql from 'mysql';
+import process from "process";
 
 const dbSettings = {
-    user: 'sigma',
-    password: 'linux123',
-    host: 'localhost',
-    database: 'mpmdb'
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    host: process.env.HOST,
+    database: 'mpmdb',
+    ssl: {
+        rejectUnauthorized: true
+    }
 }
 
 export async function getConnection() {

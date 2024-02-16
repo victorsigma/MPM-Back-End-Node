@@ -216,6 +216,7 @@ INSERT INTO `users` (`userId`, `userName`, `password`, `userMail`, `phoneNumber`
 -- Indices de la tabla `activities`
 --
 ALTER TABLE `activities`
+  ADD PRIMARY KEY (`Id`),
   ADD KEY `FK_Project` (`projectId`),
   ADD KEY `FK_Status` (`status`);
 

@@ -35,7 +35,7 @@ export const login = async (req, res) => {
                             phoneNumber: user.phoneNumber,
                             userIcon: user.userIcon
     
-                        }, '77767b40-fedc-11ec-b939-0242ac120002', { expiresIn: '24h' }, (err, token) => {
+                        }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
                             res.json({ token })
                         })
                     }
@@ -46,7 +46,7 @@ export const login = async (req, res) => {
                             phoneNumber: user.phoneNumber,
                             userIcon: user.userIcon
     
-                        }, '77767b40-fedc-11ec-b939-0242ac120002', { expiresIn: '30d' }, (err, token) => {
+                        }, process.env.KEY, { expiresIn: '30d' }, (err, token) => {
                             res.json({ token })
                         })
                     }
@@ -56,6 +56,7 @@ export const login = async (req, res) => {
             })
         }
     } catch (error) {
+        console.log(error)
         res.status(500).send(error.message);
     }
 }
