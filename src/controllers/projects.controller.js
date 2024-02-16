@@ -27,7 +27,10 @@ export const createNewProject = async (req, res) => {
 
         const id = uuidv4()
 
-        const project = await queryAsync(querys.setProject, [id, title, subtitle, src, dateStart, dateEnd, user[0].userId]);
+        const toDateStart = new Date(dateStart).toISOString().slice(0, 19).replace('T', ' ');
+        const toDateEnd = new Date(dateEnd).toISOString().slice(0, 19).replace('T', ' ');
+
+        const project = await queryAsync(querys.setProject, [id, title, subtitle, src, toDateStart, toDateEnd, user[0].userId]);
         await queryAsync(querys.setProjectHasUser, [id, user[0].userId, 0]
         );
 
@@ -79,6 +82,7 @@ export const getProjectById = async (req, res) => {
 
         res.json(result);
     } catch (error) {
+        console.log(error)
         res.status(500).send(error.message)
     }
 }

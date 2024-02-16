@@ -75,7 +75,9 @@ export const createNewActivity = async (req, res) => {
         const connection = await getConnection();
         const queryAsync = promisify(connection.query).bind(connection);
 
-        await queryAsync(querys.setActivity, [uuidv4(), title, subtitle, src, status, dateEnd, leader, analyst, designer, programmer, projectId]);
+        const toDateEnd = new Date(dateEnd).toISOString().slice(0, 19).replace('T', ' ');
+
+        await queryAsync(querys.setActivity, [uuidv4(), title, subtitle, src, status, toDateEnd, leader, analyst, designer, programmer, projectId]);
 
         res.json(data);
     } catch (error) {
