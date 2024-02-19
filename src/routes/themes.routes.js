@@ -3,6 +3,6 @@ import { getThemes } from '../controllers/themes.controller';
 
 const router = Router();
 
-router.post('/api/Themes', getThemes)
+router.get('/api/Themes', getThemes)
 
 export default router;

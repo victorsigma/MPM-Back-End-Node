@@ -1,13 +1,12 @@
 import { getConnection, querys } from "../database";
-import jwt  from "jsonwebtoken";
+import { promisify } from 'util';
 
 export const getThemes = async (req, res) => {
     try {
         const pool = await getConnection();
         const queryAsync = promisify(pool.query).bind(pool);
 
-        const themes = queryAsync(querys.getThemes);
-
+        const themes = await queryAsync(querys.getThemes);
         return res.json(themes);
     }
     catch(error) {
