@@ -14,6 +14,7 @@ export const querys = {
     ORDER BY pu.idRol;`,
     getUsers: 'SELECT * FROM users',
     getRol: 'SELECT rolName	FROM rols WHERE Id = ?',
+    getThemes: 'SELECT Id, themeName FROM themes',
 
     setProject: 'INSERT INTO projects SET id = ?, title = ?, subtitle = ?, src = ?, dateStart = ?, dateEnd = ?, owner = ?',
     setActivity: 'INSERT INTO activities SET id = ?, title = ?, subtitle = ?, src = ?, status = ?, dateEnd = ?, leader = ?, analyst = ?, designer = ?, programmer = ?, projectId = ?',

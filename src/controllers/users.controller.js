@@ -33,7 +33,8 @@ export const login = async (req, res) => {
                             userName: user.userName,
                             userMail: user.userMail,
                             phoneNumber: user.phoneNumber,
-                            userIcon: user.userIcon
+                            userIcon: user.userIcon,
+                            selectedTheme: user.selectedTheme
     
                         }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
                             res.json({ token })
@@ -44,7 +45,8 @@ export const login = async (req, res) => {
                             userName: user.userName,
                             userMail: user.userMail,
                             phoneNumber: user.phoneNumber,
-                            userIcon: user.userIcon
+                            userIcon: user.userIcon,
+                            selectedTheme: user.selectedTheme
     
                         }, process.env.KEY, { expiresIn: '30d' }, (err, token) => {
                             res.json({ token })
