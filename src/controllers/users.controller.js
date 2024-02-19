@@ -37,7 +37,7 @@ export const login = async (req, res) => {
                             userMail: user.userMail,
                             phoneNumber: user.phoneNumber,
                             userIcon: user.userIcon,
-                            selectedTheme: selectedTheme
+                            selectedTheme: selectedTheme[0].themeName
     
                         }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
                             res.json({ token })
@@ -49,7 +49,7 @@ export const login = async (req, res) => {
                             userMail: user.userMail,
                             phoneNumber: user.phoneNumber,
                             userIcon: user.userIcon,
-                            selectedTheme: selectedTheme
+                            selectedTheme: selectedTheme[0].themeName
     
                         }, process.env.KEY, { expiresIn: '30d' }, (err, token) => {
                             res.json({ token })
