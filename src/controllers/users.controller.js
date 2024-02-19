@@ -1,14 +1,14 @@
 import { getConnection, querys } from "../database";
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import bcrypt from "bcrypt";
-import jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { promisify } from 'util';
 
 export const login = async (req, res) => {
     const { userNameOrEmail, password } = req.body
     const isRemember = req.query.remember == 'true' ? true : false;
 
-    if( userNameOrEmail == null || password == null) return res.status(400).send({msg: 'Bad Request'});
+    if (userNameOrEmail == null || password == null) return res.status(400).send({ msg: 'Bad Request' });
 
     try {
         const pool = await getConnection();
@@ -16,7 +16,7 @@ export const login = async (req, res) => {
 
         const validEmail = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userNameOrEmail)
         let checkUser;
-        if(validEmail) {
+        if (validEmail) {
             //checkUser = await pool.request().input('userMail', sql.VarChar, userNameOrEmail).query(querys.checkEmail);
             checkUser = await queryAsync(querys.checkEmail, [userNameOrEmail])
         } else {
@@ -25,20 +25,20 @@ export const login = async (req, res) => {
 
         const user = checkUser[0];
 
-        
-        if(checkUser != undefined) {
+
+        if (checkUser != undefined) {
             const selectedTheme = await queryAsync(querys.getTheme, [user.selectedTheme])
             bcrypt.compare(password, user.password).then((result) => {
-                if(result) {
-                    
-                    if(!isRemember) {
+                if (result) {
+
+                    if (!isRemember) {
                         jwt.sign({
                             userName: user.userName,
                             userMail: user.userMail,
                             phoneNumber: user.phoneNumber,
                             userIcon: user.userIcon,
                             selectedTheme: selectedTheme[0].themeName
-    
+
                         }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
                             res.json({ token })
                         })
@@ -50,7 +50,7 @@ export const login = async (req, res) => {
                             phoneNumber: user.phoneNumber,
                             userIcon: user.userIcon,
                             selectedTheme: selectedTheme[0].themeName
-    
+
                         }, process.env.KEY, { expiresIn: '30d' }, (err, token) => {
                             res.json({ token })
                         })
@@ -66,10 +66,90 @@ export const login = async (req, res) => {
     }
 }
 
+export const changeTheme = async (req, res) => {
+    const { token, theme } = req.body
+
+    jwt.verify(token, "77767b40-fedc-11ec-b939-0242ac120002", (error, authData) => {
+        if (error) return res.json({ value: false });
+    })
+    const tokenInfo = jwt.decode(token, { complete: true })
+    try {
+
+        const pool = await getConnection();
+        const queryAsync = promisify(pool.query).bind(pool);
+        const checkUser = await queryAsync(querys.checkUserName, [tokenInfo.payload.userName]);
+
+        const user = checkUser[0];
+
+        await queryAsync(querys.updateUserTheme, [theme.Id, user.userId])
+
+        const checkNewUser = await queryAsync(querys.checkUserName, [tokenInfo.payload.userName]);
+
+        const newUser = checkNewUser[0];
+        const selectedTheme = await queryAsync(querys.getTheme, [newUser.selectedTheme])
+
+        if (checkNewUser != undefined) {
+            jwt.sign({
+                userName: newUser.userName,
+                userMail: newUser.userMail,
+                phoneNumber: newUser.phoneNumber,
+                userIcon: newUser.userIcon,
+                selectedTheme: selectedTheme[0].themeName
+
+            }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
+                return res.json({ token })
+            })
+        }
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+}
+
+export const changeIcon = async (req, res) => {
+    const { token, icon } = req.body
+
+    jwt.verify(token, "77767b40-fedc-11ec-b939-0242ac120002", (error, authData) => {
+        if (error) return res.json({ value: false });
+    })
+    const tokenInfo = jwt.decode(token, { complete: true })
+    try {
+
+        const pool = await getConnection();
+        const queryAsync = promisify(pool.query).bind(pool);
+        const checkUser = await queryAsync(querys.checkUserName, [tokenInfo.payload.userName]);
+
+        const user = checkUser[0];
+
+        await queryAsync(querys.updateUserIcon, [icon.id, user.userId])
+
+        const checkNewUser = await queryAsync(querys.checkUserName, [tokenInfo.payload.userName]);
+
+        const newUser = checkNewUser[0];
+        const selectedTheme = await queryAsync(querys.getTheme, [newUser.selectedTheme])
+
+        if (checkNewUser != undefined) {
+            jwt.sign({
+                userName: newUser.userName,
+                userMail: newUser.userMail,
+                phoneNumber: newUser.phoneNumber,
+                userIcon: newUser.userIcon,
+                selectedTheme: selectedTheme[0].themeName
+
+            }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
+                return res.json({ token })
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error.message);
+    }
+}
+
+
 export const verifyLogin = async (req, res) => {
     jwt.verify(req.body.token, "77767b40-fedc-11ec-b939-0242ac120002", (error, authData) => {
-        if (error) return res.json({value: false});
-        res.json({value: true})
+        if (error) return res.json({ value: false });
+        res.json({ value: true })
     })
 }
 

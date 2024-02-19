@@ -1,21 +1,24 @@
 import { Router } from 'express';
-import { createNewUser, getUserById, deleteUserById, updateUserById, login, verifyLogin } from '../controllers/users.controller';
+import { createNewUser, getUserById, deleteUserById, updateUserById, login, verifyLogin, changeTheme, changeIcon } from '../controllers/users.controller';
 
 const router = Router();
 
-//router.get('/api/Users', getUsers)
+//router.get('/api/users', getUsers)
 
-router.post('/api/Users', createNewUser)
+router.post('/api/users', createNewUser)
 
-router.get('/api/Users/:id', getUserById)
+router.get('/api/users/:id', getUserById)
 
-router.delete('/api/Users/:id', deleteUserById)
+router.delete('/api/users/:id', deleteUserById)
 
-router.put('/api/Users/:id', updateUserById)
+router.put('/api/users/:id', updateUserById)
 
-router.post('/api/Login', login)
+router.post('/api/login', login)
 
 router.post('/api/verifyLogin', verifyLogin)
+
+router.post('/api/changeTheme', changeTheme),
+router.post('/api/changeIcon', changeIcon)
 
 
 

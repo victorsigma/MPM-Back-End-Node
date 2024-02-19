@@ -13,3 +13,16 @@ export const getThemes = async (req, res) => {
         res.status(500).send(error.message);
     }
 }
+
+export const getIcons = async (req, res) => {
+    try {
+        const pool = await getConnection();
+        const queryAsync = promisify(pool.query).bind(pool);
+
+        const icons = await queryAsync(querys.getIcons);
+        return res.json(icons);
+    }
+    catch(error) {
+        res.status(500).send(error.message);
+    }
+}

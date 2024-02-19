@@ -14,6 +14,7 @@ export const querys = {
     ORDER BY pu.idRol;`,
     getUsers: 'SELECT * FROM users',
     getRol: 'SELECT rolName	FROM rols WHERE Id = ?',
+    getIcons: 'SELECT id, iconName FROM usericons ORDER BY iconName ASC;',
     getThemes: 'SELECT Id, themeName FROM themes',
     getTheme: 'SELECT themeName FROM themes WHERE Id = ?',
 
@@ -80,6 +81,15 @@ export const querys = {
         password = ?,
         userMail = ?,
         phoneNumber = ?
+    WHERE userId = ?`,
+
+    updateUserTheme: 
+    `UPDATE users
+        SET selectedTheme = ?
+    WHERE userId = ?`,
+    updateUserIcon: 
+    `UPDATE users
+        SET userIcon = ?
     WHERE userId = ?`,
 
     checkEmail: 'SELECT * FROM users WHERE userMail = ?',
