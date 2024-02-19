@@ -25,16 +25,19 @@ export const login = async (req, res) => {
 
         const user = checkUser[0];
 
+        
         if(checkUser != undefined) {
+            const selectedTheme = await queryAsync(querys.getTheme, [user.selectedTheme])
             bcrypt.compare(password, user.password).then((result) => {
                 if(result) {
+                    
                     if(!isRemember) {
                         jwt.sign({
                             userName: user.userName,
                             userMail: user.userMail,
                             phoneNumber: user.phoneNumber,
                             userIcon: user.userIcon,
-                            selectedTheme: user.selectedTheme
+                            selectedTheme: selectedTheme
     
                         }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
                             res.json({ token })
@@ -46,7 +49,7 @@ export const login = async (req, res) => {
                             userMail: user.userMail,
                             phoneNumber: user.phoneNumber,
                             userIcon: user.userIcon,
-                            selectedTheme: user.selectedTheme
+                            selectedTheme: selectedTheme
     
                         }, process.env.KEY, { expiresIn: '30d' }, (err, token) => {
                             res.json({ token })
