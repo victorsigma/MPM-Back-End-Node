@@ -15,7 +15,7 @@ export const querys = {
     getUsers: 'SELECT * FROM users',
     getRol: 'SELECT rolName	FROM rols WHERE Id = ?',
     getIcons: 'SELECT id, iconName FROM usericons ORDER BY iconName ASC;',
-    getThemes: 'SELECT Id, themeName FROM themes',
+    getThemes: 'SELECT Id, themeName, themeType FROM themes',
     getTheme: 'SELECT themeType FROM themes WHERE Id = ?',
 
     setProject: 'INSERT INTO projects SET id = ?, title = ?, subtitle = ?, src = ?, dateStart = ?, dateEnd = ?, owner = ?',
