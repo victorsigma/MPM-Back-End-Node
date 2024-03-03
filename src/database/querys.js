@@ -16,7 +16,7 @@ export const querys = {
     getRol: 'SELECT rolName	FROM rols WHERE Id = ?',
     getIcons: 'SELECT id, iconName FROM usericons ORDER BY iconName ASC;',
     getThemes: 'SELECT Id, themeName FROM themes',
-    getTheme: 'SELECT themeName FROM themes WHERE Id = ?',
+    getTheme: 'SELECT themeType FROM themes WHERE Id = ?',
 
     setProject: 'INSERT INTO projects SET id = ?, title = ?, subtitle = ?, src = ?, dateStart = ?, dateEnd = ?, owner = ?',
     setActivity: 'INSERT INTO activities SET id = ?, title = ?, subtitle = ?, src = ?, status = ?, dateEnd = ?, leader = ?, analyst = ?, designer = ?, programmer = ?, projectId = ?',
