@@ -94,7 +94,7 @@ export const changeTheme = async (req, res) => {
                 userMail: newUser.userMail,
                 phoneNumber: newUser.phoneNumber,
                 userIcon: newUser.userIcon,
-                selectedTheme: selectedTheme[0].themeName
+                selectedTheme: selectedTheme[0].themeType
 
             }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
                 return res.json({ token })
