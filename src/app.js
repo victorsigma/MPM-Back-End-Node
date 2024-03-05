@@ -26,6 +26,7 @@ app.use(profileRoutes)
 app.use('/api/themes', express.static(join(__dirname, "./assets/themes")))
 app.use('/api/user-icon/full', express.static(join(__dirname, "./assets/user-icons/full")))
 app.use('/api/user-icon/small', express.static(join(__dirname, "./assets/user-icons/small")))
+app.use('/api/videos/', express.static(join(__dirname, "./assets/videos/")))
 
 
 export default app;
