@@ -157,6 +157,17 @@ export const updateUser = async (req, res) => {
         const pool = await getConnection();
         const queryAsync = promisify(pool.query).bind(pool);
         const checkUser = await queryAsync(querys.checkUserName, [tokenInfo.payload.userName]);
+
+
+        const [checkEmail] = await queryAsync(querys.checkEmail, [update.userMail]);
+        const [checkUserName] = await queryAsync(querys.checkUserName, [update.userName]);
+        const [checkPhoneNumber] = await queryAsync(querys.checkPhoneNumber, [update.phoneNumber]);
+
+        if (checkEmail != undefined || checkUserName != undefined || checkPhoneNumber != undefined) {
+            return res.status(409).json({ error: 'Dato o usuario duplicado', msg: 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.' });
+        }
+
+
         if(checkUser.length) {
             const user = checkUser[0];
 
