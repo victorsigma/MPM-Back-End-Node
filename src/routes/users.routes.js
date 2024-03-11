@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { createNewUser, getUserById, deleteUserById, updateUserById, login, verifyLogin, changeTheme, changeIcon } from '../controllers/users.controller';
+import { createNewUser, getUserById, deleteUserById, updateUser, login, verifyLogin, changeTheme, changeIcon } from '../controllers/users.controller';
+import { verifyToken } from '../libs/verification';
 
 const router = Router();
 
@@ -11,16 +12,14 @@ router.get('/api/users/:id', getUserById)
 
 router.delete('/api/users/:id', deleteUserById)
 
-router.put('/api/users/:id', updateUserById)
-
 router.post('/api/login', login)
 
 router.post('/api/verifyLogin', verifyLogin)
 
-router.post('/api/changeTheme', changeTheme),
-router.post('/api/changeIcon', changeIcon)
+router.put('/api/changeTheme', changeTheme),
+router.put('/api/changeIcon', changeIcon)
 
-
+router.put('/api/users', updateUser)
 
 
 export default router;

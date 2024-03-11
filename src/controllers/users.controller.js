@@ -133,7 +133,7 @@ export const changeIcon = async (req, res) => {
                 userMail: newUser.userMail,
                 phoneNumber: newUser.phoneNumber,
                 userIcon: newUser.userIcon,
-                selectedTheme: selectedTheme[0].themeName
+                selectedTheme: selectedTheme[0].themeType
 
             }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
                 return res.json({ token })
@@ -144,6 +144,57 @@ export const changeIcon = async (req, res) => {
         res.status(500).send(error.message);
     }
 }
+
+export const updateUser = async (req, res) => {
+    const { token, update } = req.body
+
+    jwt.verify(token, "77767b40-fedc-11ec-b939-0242ac120002", (error, authData) => {
+        if (error) return res.json({ value: false });
+    })
+    const tokenInfo = jwt.decode(token, { complete: true })
+
+    try {
+        const pool = await getConnection();
+        const queryAsync = promisify(pool.query).bind(pool);
+        const checkUser = await queryAsync(querys.checkUserName, [tokenInfo.payload.userName]);
+        if(checkUser.length) {
+            const user = checkUser[0];
+
+            user.userName = update.userName !== undefined ? update.userName : user.userName;
+            
+            user.userMail = update.userMail !== undefined ? update.userMail : user.userMail;
+            user.phoneNumber = update.phoneNumber !== undefined ? update.phoneNumber : user.phoneNumber;
+
+            const hashedPassword = update.password !== undefined ? await bcrypt.hash(update.password, 10) : user.password;
+
+            user.password = hashedPassword;
+
+            await queryAsync(querys.updateUser, [user.userName, user.password, user.userMail, user.phoneNumber, user.userId]);
+
+            const checkNewUser = await queryAsync(querys.getUserById, [user.userId]);
+    
+            const newUser = checkNewUser[0];
+            const selectedTheme = await queryAsync(querys.getTheme, [newUser.selectedTheme])
+
+            if (checkNewUser != undefined) {
+                jwt.sign({
+                    userName: newUser.userName,
+                    userMail: newUser.userMail,
+                    phoneNumber: newUser.phoneNumber,
+                    userIcon: newUser.userIcon,
+                    selectedTheme: selectedTheme[0].themeType
+
+                }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
+                    return res.json({ token })
+                })
+            }
+        } else {
+            return res.status(404).json({ msg: 'Bad Request' });
+        }
+    } catch (error) {
+        res.status(500).send({ msg: error.message });
+    }
+};
 
 
 export const verifyLogin = async (req, res) => {
@@ -175,16 +226,16 @@ export const createNewUser = async (req, res) => {
         const validUserName = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userName);
         const validPhoneNumber = `${parseInt(phoneNumber)}`.length;
 
-        if (validEmail) return res.status(500).json({ error: 'Correo no válido', message: 'El correo electrónico proporcionado no cumple con las características necesarias para ser válido.' });
-        if (validUserName) return res.status(500).json({ error: 'Nombre no válido', message: 'El nombre de usuario proporcionado no cumple con las características necesarias para ser válido.' });
-        if (validPhoneNumber !== 10) return res.status(500).json({ error: 'Número de teléfono no válido', message: 'El número telefónico proporcionado no cumple con las características necesarias para ser válido.' });
+        if (validEmail) return res.status(500).json({ error: 'Correo no válido', msg: 'El correo electrónico proporcionado no cumple con las características necesarias para ser válido.' });
+        if (validUserName) return res.status(500).json({ error: 'Nombre no válido', msg: 'El nombre de usuario proporcionado no cumple con las características necesarias para ser válido.' });
+        if (validPhoneNumber !== 10) return res.status(500).json({ error: 'Número de teléfono no válido', msg: 'El número telefónico proporcionado no cumple con las características necesarias para ser válido.' });
 
         const [checkEmail] = await queryAsync(querys.checkEmail, [userMail]);
         const [checkUserName] = await queryAsync(querys.checkUserName, [userName]);
         const [checkPhoneNumber] = await queryAsync(querys.checkPhoneNumber, [phoneNumber]);
 
         if (checkEmail != undefined || checkUserName != undefined || checkPhoneNumber != undefined) {
-            return res.status(409).json({ error: 'Dato o usuario duplicado', message: 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.' });
+            return res.status(409).json({ error: 'Dato o usuario duplicado', msg: 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -220,34 +271,6 @@ export const deleteUserById = async (req, res) => {
         await queryAsync(querys.deleteUser, [id]);
 
         res.sendStatus(204);
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-};
-
-export const updateUserById = async (req, res) => {
-    const { id } = req.params;
-    const { userId, userName, password, userMail, phoneNumber } = req.body;
-
-    if (
-        userId == null ||
-        userName == null ||
-        password == null ||
-        userMail == null ||
-        phoneNumber == null
-    ) {
-        return res.status(400).json({ msg: 'Bad Request' });
-    }
-
-    try {
-        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
-        const queryAsync = promisify(connection.query).bind(connection);
-
-        await queryAsync(querys.updateUser, [userName, password, userMail, phoneNumber, id]);
-
-        const result = await queryAsync(querys.getUserById, [id]);
-
-        res.json(result[0]);
     } catch (error) {
         res.status(500).send(error.message);
     }

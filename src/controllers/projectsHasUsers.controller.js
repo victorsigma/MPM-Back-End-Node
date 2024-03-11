@@ -13,7 +13,7 @@ export const getProjectsHasUsers = async (req, res) => {
         res.json(result);
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }
 
@@ -73,7 +73,7 @@ export const getProjectHasUserById = async (req, res) => {
         res.json(result.recordset[0]);
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }
 
@@ -95,7 +95,7 @@ export const deleteProjectHasUserById = async (req, res) => {
         return res.sendStatus(204)
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }
 
@@ -127,6 +127,6 @@ export const updateProjectHasUserById = async (req, res) => {
         res.json(result.recordset[0]);
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }

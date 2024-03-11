@@ -98,7 +98,7 @@ export const getActivityById = async (req, res) => {
         res.json(result.recordset[0]);
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }
 
@@ -114,7 +114,7 @@ export const deleteActivityById = async (req, res) => {
         res.sendStatus(204)
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }
 
@@ -161,6 +161,6 @@ export const updateActivityById = async (req, res) => {
         res.json(result.recordset[0]);
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }

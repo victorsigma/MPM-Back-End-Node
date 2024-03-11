@@ -56,7 +56,7 @@ export const getProjects = async (req, res) => {
         res.json(result);
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }
 
@@ -99,7 +99,7 @@ export const deleteProjectById = async (req, res) => {
         res.sendStatus(204)
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }
 
@@ -135,6 +135,6 @@ export const updateProjectById = async (req, res) => {
         res.json(result.recordset[0]);
     } catch (error) {
         res.status(500);
-        res.send(error.message)
+        res.send({ msg: error.message });
     }
 }
