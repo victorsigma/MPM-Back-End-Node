@@ -106,10 +106,10 @@ export const getActivityById = async (req, res) => {
 export const deleteActivityById = async (req, res) => {
     const { id } = req.params;
     try {
-        const pool = await getConnection();
-        await pool.request()
-        .input('id', id)
-        .query(querys.deleteActivity);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
+
+        await queryAsync(querys.deleteActivity, [id])
 
         res.sendStatus(204)
     } catch (error) {
@@ -127,28 +127,30 @@ export const updateActivityById = async (req, res) => {
     try {
         const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
         const queryAsync = promisify(connection.query).bind(connection);
+        console.log(req.body)
 
         const activities = await queryAsync(querys.getActivityById, [id]);
 
-        if(activities.length) return res.status(404).json({ 'message': 'Not Found' });
+        if(!activities.length) return res.status(404).json({ 'message': 'Not Found' });
 
         const activity = activities[0];
 
-        const newTitle = title !== undefined ? title : activity.title
-        const newSubtitle = subtitle !== undefined ? subtitle : activity.subtitle
-        const newSrc = src !== undefined ? src : activity.src
-        const newStatus = status !== undefined ? status : activity.status
-        const newDateEnd = dateEnd !== undefined ? dateEnd : activity.dateEnd
-        const newAnalyst = analyst !== undefined ? analyst : activity.analyst
-        const newDesigner = designer !== undefined ? designer : activity.designer
-        const newProgrammer = programmer !== undefined ? programmer : activity.programmer
+        const newTitle = (title !== undefined) || (title !== null) ? title : activity.title
+        const newSubtitle = (subtitle !== undefined) || (subtitle !== null) ? subtitle : activity.subtitle
+        const newSrc = (src !== undefined) || (src !== null) ? src : activity.src
+        const newStatus = (status !== undefined) || (status !== null) ? status : activity.status
+        const newDateEnd = (dateEnd !== undefined) || (dateEnd !== null) ? dateEnd : activity.dateEnd
+        const newAnalyst = (analyst !== undefined) || (analyst !== null) ? analyst : activity.analyst
+        const newDesigner = (designer !== undefined) || (designer !== null) ? designer : activity.designer
+        const newProgrammer = (programmer !== undefined) || (programmer !== null) ? programmer : activity.programmer
 
-        await queryAsync(querys.updateActivity, [newTitle, newSubtitle, newSrc, newStatus, newDateEnd, newAnalyst, newDesigner, newProgrammer]);
+        await queryAsync(querys.updateActivity, [newTitle, newSubtitle, newSrc, newStatus, newDateEnd, newAnalyst, newDesigner, newProgrammer, id]);
 
         const result = await queryAsync(querys.getActivityById, [id]);
 
-        res.json(result.recordset[0]);
+        res.json(result[0]);
     } catch (error) {
+        console.log(error);
         res.status(500).send({ 'message': error.message });
     }
 }

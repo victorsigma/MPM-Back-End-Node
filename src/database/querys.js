@@ -46,12 +46,12 @@ export const querys = {
     deleteProjectHasUser: 'DELETE FROM projectshasusers WHERE userIdUser = ? AND proyectsIdProject = ?',
     deleteUser: 'DELETE FROM users WHERE userId = ?',
 
-    updateProject: 
+    updateProject:
     `UPDATE projects
         SET title = ?, 
         subtitle = ?,
         src = ?,
-        dateEnd = ?
+        dateEnd = STR_TO_DATE(?, '%Y-%m-%dT%H:%i:%s.000Z')
     WHERE id = ?`,
 
     updateActivity: 
@@ -60,7 +60,7 @@ export const querys = {
         subtitle = ?,
         src = ?,
         status = ?,
-        dateEnd = ?,
+        dateEnd = STR_TO_DATE(?, '%Y-%m-%dT%H:%i:%s.000Z'),
         analyst = ?,
         designer = ?,
         programmer = ?

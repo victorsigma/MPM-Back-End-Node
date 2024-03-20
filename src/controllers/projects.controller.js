@@ -104,8 +104,8 @@ export const deleteProjectById = async (req, res) => {
 }
 
 export const updateProjectById = async (req, res) => {
-    const { Id } = req.params
-    const { id, title, subtitle, src, dateStart, dateEnd } = req.body
+    const { id } = req.params
+    const { title, subtitle, src, dateStart, dateEnd } = req.body
 
     if (
         id == null ||
@@ -114,27 +114,18 @@ export const updateProjectById = async (req, res) => {
         src == null ||
         dateStart == null ||
         dateEnd == null
-    ) {
-        return res.status(400).json({'message': 'Bad Request'});
-    }
+    ) return res.status(400).json({'message': 'Bad Request'});
+
 
     try {
-        const pool = await getConnection();
-        await pool.request()
-        .input('id', Id)
-        .input('title', sql.VarChar, title)
-        .input('subtitle', sql.VarChar, subtitle)
-        .input('src', sql.VarChar, src)
-        .input('dateEnd', sql.DateTime2, dateEnd)
-        .query(querys.updateProject);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        const result = await pool.request()
-        .input('id', Id)
-        .query(querys.getProjectById);
+        await queryAsync(querys.updateProject, [title, subtitle, src, dateEnd, id]);
 
-        res.json(result.recordset[0]);
+        res.status(200).send({ 'message': 'ok' });
     } catch (error) {
-        res.status(500);
-        res.send({ 'message': error.message });
+        console.log(error);
+        res.status(500).send({ 'message': error.message });
     }
 }

@@ -12,7 +12,7 @@ router.get('/api/projects/:id', verifyToken, getProjectById)
 
 router.delete('/api/projects/:id', verifyToken, deleteProjectById)
 
-router.put('/api/projects/:Id', verifyToken, updateProjectById)
+router.put('/api/projects/:id', verifyToken, updateProjectById)
 
 
 export default router;
