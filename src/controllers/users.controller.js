@@ -8,7 +8,7 @@ export const login = async (req, res) => {
     const { userNameOrEmail, password } = req.body
     const isRemember = req.query.remember == 'true' ? true : false;
 
-    if (userNameOrEmail == null || password == null) return res.status(400).send({ msg: 'Bad Request' });
+    if (userNameOrEmail == null || password == null) return res.status(400).send({ 'message': 'Bad Request' });
 
     try {
         const pool = await getConnection();
@@ -56,7 +56,7 @@ export const login = async (req, res) => {
                         })
                     }
                 } else {
-                    res.status(500).json({ msg: 'Incorrect data' })
+                    res.status(500).json({ 'message': 'Incorrect data' })
                 }
             })
         }
@@ -164,7 +164,7 @@ export const updateUser = async (req, res) => {
         const [checkPhoneNumber] = await queryAsync(querys.checkPhoneNumber, [update.phoneNumber]);
 
         if (checkEmail != undefined || checkUserName != undefined || checkPhoneNumber != undefined) {
-            return res.status(409).json({ error: 'Dato o usuario duplicado', msg: 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.' });
+            return res.status(409).json({ error: 'Dato o usuario duplicado', 'message': 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.' });
         }
 
 
@@ -200,10 +200,10 @@ export const updateUser = async (req, res) => {
                 })
             }
         } else {
-            return res.status(404).json({ msg: 'Bad Request' });
+            return res.status(404).json({ 'message': 'Bad Request' });
         }
     } catch (error) {
-        res.status(500).send({ msg: error.message });
+        res.status(500).send({ 'message': error.message });
     }
 };
 
@@ -226,7 +226,7 @@ export const createNewUser = async (req, res) => {
         userMail == null ||
         phoneNumber == null
     ) {
-        return res.status(400).json({ msg: 'Bad Request' });
+        return res.status(400).json({ 'message': 'Bad Request' });
     }
 
     try {
@@ -237,16 +237,16 @@ export const createNewUser = async (req, res) => {
         const validUserName = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userName);
         const validPhoneNumber = `${parseInt(phoneNumber)}`.length;
 
-        if (validEmail) return res.status(500).json({ error: 'Correo no válido', msg: 'El correo electrónico proporcionado no cumple con las características necesarias para ser válido.' });
-        if (validUserName) return res.status(500).json({ error: 'Nombre no válido', msg: 'El nombre de usuario proporcionado no cumple con las características necesarias para ser válido.' });
-        if (validPhoneNumber !== 10) return res.status(500).json({ error: 'Número de teléfono no válido', msg: 'El número telefónico proporcionado no cumple con las características necesarias para ser válido.' });
+        if (validEmail) return res.status(500).json({ error: 'Correo no válido', 'message': 'El correo electrónico proporcionado no cumple con las características necesarias para ser válido.' });
+        if (validUserName) return res.status(500).json({ error: 'Nombre no válido', 'message': 'El nombre de usuario proporcionado no cumple con las características necesarias para ser válido.' });
+        if (validPhoneNumber !== 10) return res.status(500).json({ error: 'Número de teléfono no válido', 'message': 'El número telefónico proporcionado no cumple con las características necesarias para ser válido.' });
 
         const [checkEmail] = await queryAsync(querys.checkEmail, [userMail]);
         const [checkUserName] = await queryAsync(querys.checkUserName, [userName]);
         const [checkPhoneNumber] = await queryAsync(querys.checkPhoneNumber, [phoneNumber]);
 
         if (checkEmail != undefined || checkUserName != undefined || checkPhoneNumber != undefined) {
-            return res.status(409).json({ error: 'Dato o usuario duplicado', msg: 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.' });
+            return res.status(409).json({ error: 'Dato o usuario duplicado', 'message': 'El servidor ha encontrado un conflicto debido a un dato o usuario duplicado. Por favor, revise y corrija la solicitud.' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);

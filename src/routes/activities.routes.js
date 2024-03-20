@@ -14,7 +14,7 @@ router.get('/api/activities-status/', verifyToken, getActivitiesStatus)
 
 router.delete('/api/activities/:id', verifyToken, deleteActivityById)
 
-router.put('/api/activities/:Id', verifyToken, updateActivityById)
+router.put('/api/activities/:id', verifyToken, updateActivityById)
 
 
 export default router;

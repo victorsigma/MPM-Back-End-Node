@@ -12,7 +12,7 @@ export const getActivities = async (req, res) => {
         project == undefined ||
         status == undefined
     ) {
-        return res.status(400).json({msg: 'Bad Request'});
+        return res.status(400).json({'message': 'Bad Request'});
     }
 
     try {
@@ -68,7 +68,7 @@ export const createNewActivity = async (req, res) => {
         programmer == null ||
         projectId == null
     ) {
-        return res.status(400).json({ msg: 'Bad Request' });
+        return res.status(400).json({ 'message': 'Bad Request' });
     }
 
     try {
@@ -98,7 +98,7 @@ export const getActivityById = async (req, res) => {
         res.json(result.recordset[0]);
     } catch (error) {
         res.status(500);
-        res.send({ msg: error.message });
+        res.send({ 'message': error.message });
     }
 }
 
@@ -114,53 +114,41 @@ export const deleteActivityById = async (req, res) => {
         res.sendStatus(204)
     } catch (error) {
         res.status(500);
-        res.send({ msg: error.message });
+        res.send({ 'message': error.message });
     }
 }
 
 export const updateActivityById = async (req, res) => {
-    const { Id } = req.params
-    const { id, title, subtitle, src, status, dateEnd, leader, analyst, designer, programmer, projectId } = req.body
+    const { id } = req.params
+    const { title, subtitle, src, status, dateEnd, analyst, designer, programmer } = req.body
 
-    if (
-        id == null ||
-        title == null ||
-        subtitle == null ||
-        src == null ||
-        status == null ||
-        dateEnd == null ||
-        leader == null ||
-        analyst == null ||
-        designer == null ||
-        programmer == null ||
-        projectId == null
-    ) {
-        return res.status(400).json({msg: 'Bad Request'});
-    }
+    if (id == null) return res.status(400).json({ 'message': 'Bad Request' });
 
     try {
-        const pool = await getConnection();
-        await pool.request()
-        .input('id', Id)
-        .input('title', sql.VarChar, title)
-        .input('subtitle', sql.VarChar, subtitle)
-        .input('src', sql.VarChar, src)
-        .input('status', sql.Int, status)
-        .input('dateEnd', sql.DateTime2, dateEnd)
-        .input('Leader', sql.Bit, leader)
-        .input('Analyst', sql.Bit, analyst)
-        .input('Designer', sql.Bit, designer)
-        .input('Programmer', sql.Bit, programmer)
-        .input('projectId', sql.VarChar, projectId)
-        .query(querys.updateActivity);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        const result = await pool.request()
-        .input('id', Id)
-        .query(querys.getActivityById);
+        const activities = await queryAsync(querys.getActivityById, [id]);
+
+        if(activities.length) return res.status(404).json({ 'message': 'Not Found' });
+
+        const activity = activities[0];
+
+        const newTitle = title !== undefined ? title : activity.title
+        const newSubtitle = subtitle !== undefined ? subtitle : activity.subtitle
+        const newSrc = src !== undefined ? src : activity.src
+        const newStatus = status !== undefined ? status : activity.status
+        const newDateEnd = dateEnd !== undefined ? dateEnd : activity.dateEnd
+        const newAnalyst = analyst !== undefined ? analyst : activity.analyst
+        const newDesigner = designer !== undefined ? designer : activity.designer
+        const newProgrammer = programmer !== undefined ? programmer : activity.programmer
+
+        await queryAsync(querys.updateActivity, [newTitle, newSubtitle, newSrc, newStatus, newDateEnd, newAnalyst, newDesigner, newProgrammer]);
+
+        const result = await queryAsync(querys.getActivityById, [id]);
 
         res.json(result.recordset[0]);
     } catch (error) {
-        res.status(500);
-        res.send({ msg: error.message });
+        res.status(500).send({ 'message': error.message });
     }
 }

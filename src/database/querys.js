@@ -61,11 +61,9 @@ export const querys = {
         src = ?,
         status = ?,
         dateEnd = ?,
-        leader = ?,
         analyst = ?,
         designer = ?,
-        programmer = ?,
-        projectId = ?
+        programmer = ?
     WHERE id = ?`,
 
     updateProjectHasUser: 

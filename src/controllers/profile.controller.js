@@ -10,7 +10,7 @@ export const getThemes = async (req, res) => {
         return res.json(themes);
     }
     catch(error) {
-        res.status(500).send(error.message);
+        res.status(500).send({ 'message': error.message });
     }
 }
 
@@ -23,6 +23,6 @@ export const getIcons = async (req, res) => {
         return res.json(icons);
     }
     catch(error) {
-        res.status(500).send(error.message);
+        res.status(500).send({ 'message': error.message });
     }
 }
