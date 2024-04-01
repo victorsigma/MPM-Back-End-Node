@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createNewUser, getUserById, deleteUserById, updateUser, login, verifyLogin, changeTheme, changeIcon } from '../controllers/users.controller';
+import { createNewUser, getUserById, deleteUserById, updateUser, login, verifyLogin, changeTheme, changeIcon, passwordRecoveryRequest, passwordRecoveryReset } from '../controllers/users.controller';
 import { verifyToken } from '../libs/verification';
 
 const router = Router();
@@ -16,10 +16,17 @@ router.post('/api/login', login)
 
 router.post('/api/verifyLogin', verifyLogin)
 
-router.put('/api/changeTheme', changeTheme),
-router.put('/api/changeIcon', changeIcon)
+router.post('/api/passwordRecovery/request', passwordRecoveryRequest)
 
-router.put('/api/users', updateUser)
+router.post('/api/passwordRecovery/reset/:token', passwordRecoveryReset)
+
+router.put('/api/users', verifyToken, updateUser)
+
+router.put('/api/changeTheme', verifyToken, changeTheme)
+
+router.put('/api/changeIcon', verifyToken, changeIcon)
+
+
 
 
 export default router;

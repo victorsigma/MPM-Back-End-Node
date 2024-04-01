@@ -78,7 +78,8 @@ export const querys = {
         SET userName = ?, 
         password = ?,
         userMail = ?,
-        phoneNumber = ?
+        phoneNumber = ?,
+        emailVerified = ?
     WHERE userId = ?`,
 
     updateUserTheme: 
@@ -94,7 +95,17 @@ export const querys = {
     checkUserName: 'SELECT * FROM users WHERE userName = ?',
     checkPhoneNumber: 'SELECT * FROM users WHERE phoneNumber = ?',
 
-    checkRol: 'SELECT * FROM projectshasusers WHERE userIdUser = ? AND proyectsIdProject = ?'
+    checkRol: 'SELECT * FROM projectshasusers WHERE userIdUser = ? AND proyectsIdProject = ?',
+
+    verifyEmail: 
+    `UPDATE users
+        SET emailVerified = ?
+    WHERE userId = ?`,
+
+    recoveryPassword: 
+    `UPDATE users
+        SET password = ?
+    WHERE userId = ?`,
 }
 
 

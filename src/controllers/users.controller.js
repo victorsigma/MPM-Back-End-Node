@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { promisify } from 'util';
+import { transporter } from "../libs/mailer";
 
 export const login = async (req, res) => {
     const { userNameOrEmail, password } = req.body
@@ -148,7 +149,7 @@ export const changeIcon = async (req, res) => {
 export const updateUser = async (req, res) => {
     const { token, update } = req.body
 
-    jwt.verify(token, "77767b40-fedc-11ec-b939-0242ac120002", (error, authData) => {
+    jwt.verify(token, process.env.KEY, (error, authData) => {
         if (error) return res.json({ value: false });
     })
     const tokenInfo = jwt.decode(token, { complete: true })
@@ -172,15 +173,18 @@ export const updateUser = async (req, res) => {
             const user = checkUser[0];
 
             user.userName = update.userName !== undefined ? update.userName : user.userName;
-            
+
             user.userMail = update.userMail !== undefined ? update.userMail : user.userMail;
+
+            user.emailVerified = update.userMail !== undefined ? false : user.emailVerified;
+
             user.phoneNumber = update.phoneNumber !== undefined ? update.phoneNumber : user.phoneNumber;
 
             const hashedPassword = update.password !== undefined ? await bcrypt.hash(update.password, 10) : user.password;
 
             user.password = hashedPassword;
 
-            await queryAsync(querys.updateUser, [user.userName, user.password, user.userMail, user.phoneNumber, user.userId]);
+            await queryAsync(querys.updateUser, [user.userName, user.password, user.userMail, user.phoneNumber, user.emailVerified, user.userId]);
 
             const checkNewUser = await queryAsync(querys.getUserById, [user.userId]);
     
@@ -203,6 +207,7 @@ export const updateUser = async (req, res) => {
             return res.status(404).json({ 'message': 'Bad Request' });
         }
     } catch (error) {
+        console.log(error);
         res.status(500).send({ 'message': error.message });
     }
 };
@@ -286,3 +291,113 @@ export const deleteUserById = async (req, res) => {
         res.status(500).send(error.message);
     }
 };
+
+
+export const passwordRecoveryRequest = async (req, res) => {
+    const { userNameOrEmail } = req.body
+
+    if (
+        userNameOrEmail == null || userNameOrEmail == undefined
+    ) {
+        return res.status(400).json({'message': 'Bad Request'});
+    }
+
+    try {
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
+
+        const validEmail = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userNameOrEmail)
+        let checkUser;
+        if(validEmail) {
+            //checkUser = await pool.request().input('userMail', sql.VarChar, userNameOrEmail).query(querys.checkEmail);
+            checkUser = await queryAsync(querys.checkEmail, [userNameOrEmail])
+        } else {
+            checkUser = await queryAsync(querys.checkUserName, [userNameOrEmail]);
+        }
+        
+
+        if(checkUser[0] != undefined) {
+            const user = checkUser[0];
+
+            if (user.emailVerified) {
+                jwt.sign({
+                    userMail: user.userMail,
+                    userIcon: user.userIcon
+
+                }, process.env.KEY_R_PASSWORD, { expiresIn: '3h' }, async (err, token) => {
+                    //Cogigo temporar para remplazar por envio de correo
+                    const recoveryEmailMessage = {
+                        from: '"MPM" <mpm@example.com>', // Dirección del remitente
+                        to: user.userMail, // Lista de destinatarios
+                        subject: "Recuperación de Contraseña", // Asunto del correo
+                        text: "Solicitud de recuperación de contraseña", // Cuerpo del correo en texto plano
+                        html: `
+                            <div style="background-color: #1a1a1a; color: #ffffff; padding: 20px;">
+                                <h2 style="color: #f1c0ff;">Recuperación de Contraseña</h2>
+                                <p>¡Hola!</p>
+                                <p>Recibimos una solicitud para recuperar la contraseña de tu cuenta.</p>
+                                <p>Si no realizaste esta solicitud, puedes ignorar este mensaje.</p>
+                                <p>Para restablecer tu contraseña, haz clic en el siguiente enlace:</p>
+                                <a href="https://my-project-manager-mpm.web.app/password-recovery/reset/${token}" style="background-color: #6347ee; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; display: inline-block;">Restablecer Contraseña</a>
+                                <p>Si el botón de arriba no funciona, puedes copiar y pegar el siguiente enlace en tu navegador:</p>
+                                <p>https://my-project-manager-mpm.web.app/password-recovery/reset/${token}</p>
+                                <p>Gracias,</p>
+                                <p>El equipo de MPM</p>
+                            </div>
+                        ` // Cuerpo del correo en formato HTML
+                    };
+
+                    await transporter.sendMail(recoveryEmailMessage);
+                    
+                    return res.status(200).send({ 'message': 'Recovery email sent' })
+                })
+            } else {
+                // El correo electrónico no está verificado
+                return res.json({ emailAlreadyVerified: false });
+            }
+        } else {
+            return res.status(404).send({ 'message': 'Not Found' })
+        }
+    } catch (error) {
+        res.status(500).send({ 'message': error.message })
+    }
+}
+
+export const passwordRecoveryReset = async (req, res) => {
+    const { password } = req.body;
+    const { token } = req.params;
+
+    jwt.verify(token, process.env.KEY_R_PASSWORD, async (error, authData) => {
+        if (error) {
+            return res.status(401).send({ 'message': 'The request is no longer valid, please resubmit the request.' });
+        } else {
+            const tokenInfo = jwt.decode(token, { complete: true })
+
+            const email = tokenInfo.payload.userMail;
+
+            try {
+                const connection = await getConnection();
+                const queryAsync = promisify(connection.query).bind(connection);
+
+                const result = await queryAsync(querys.checkEmail, [email]);
+
+                if (result.length > 0) {
+                    // La dirección de correo electrónico existe en la base de datos
+                    const user = result[0];
+
+                    const hashedPassword = await bcrypt.hash(password, 10);
+
+                    await queryAsync(querys.recoveryPassword, [hashedPassword, user.userId])
+
+                    // La contraseña a sido cambiada correctamente
+                    return res.json({ 'message': 'Password has been successfully changed' });
+                } else {
+                    // La dirección de correo electrónico no existe en la base de datos
+                    res.status(404).json({ 'message': 'Email address not found' });
+                }
+            } catch (error) {
+                res.status(500).send({ 'message': 'Internal server error' })
+            }
+        }
+    })
+}
