@@ -1,3 +1,6 @@
 .env
 node_modules
 dist
+
+db_migration.csv
+db.sql
