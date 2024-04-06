@@ -7,13 +7,14 @@ const dbSettings = {
     host: process.env.HOST,
     database: 'mpmdb',
     ssl: {
-        rejectUnauthorized: true
+        rejectUnauthorized: false
     }
 }
 
 export async function getConnection() {
     try {
         const pool = mysql.createConnection(dbSettings);
+        console
         return pool;
     } catch (error) {
         console.error(error);
