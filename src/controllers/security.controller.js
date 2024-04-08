@@ -3,6 +3,69 @@ import { promisify } from 'util';
 import jwt from "jsonwebtoken";
 import { transporter } from "../libs/mailer";
 
+
+export const enableA2F = async (req, res) => {
+    const tokenVerify = req.token;
+
+    jwt.verify(tokenVerify, process.env.KEY, (error, authData) => {
+        if (error) return res.json({ value: false });
+    })
+    const tokenInfo = jwt.decode(tokenVerify, { complete: true })
+
+    const email = tokenInfo.payload.userMail;
+
+    try {
+        const connection = await getConnection();
+        const queryAsync = promisify(connection.query).bind(connection);
+
+        const result = await queryAsync(querys.checkEmail, [email]);
+
+        if (result.length > 0) {
+            // La dirección de correo electrónico existe en la base de datos
+            const user = result[0];
+
+            await queryAsync(querys.enableA2F, [user.userId])
+            return res.json({ 'message': 'Successfully completed' });
+        } else {
+            // La dirección de correo electrónico no existe en la base de datos
+            res.status(404).json({ 'message': 'Email address not found' });
+        }
+    } catch (error) {
+        res.status(500).send({ 'message': error.message })
+    }
+}
+
+export const disableA2F = async (req, res) => {
+    const tokenVerify = req.token;
+
+    jwt.verify(tokenVerify, process.env.KEY, (error, authData) => {
+        if (error) return res.json({ value: false });
+    })
+    const tokenInfo = jwt.decode(tokenVerify, { complete: true })
+
+    const email = tokenInfo.payload.userMail;
+
+    try {
+        const connection = await getConnection();
+        const queryAsync = promisify(connection.query).bind(connection);
+
+        const result = await queryAsync(querys.checkEmail, [email]);
+
+        if (result.length > 0) {
+            // La dirección de correo electrónico existe en la base de datos
+            const user = result[0];
+
+            await queryAsync(querys.disableA2F, [user.userId])
+            return res.json({ 'message': 'Successfully completed' });
+        } else {
+            // La dirección de correo electrónico no existe en la base de datos
+            res.status(404).json({ message: 'Email address not found' });
+        }
+    } catch (error) {
+        res.status(500).send({ 'message': error.message })
+    }
+}
+
 export const verifyAccount = async (req, res) => {
     const tokenVerify = req.token;
 
@@ -28,6 +91,42 @@ export const verifyAccount = async (req, res) => {
             } else {
                 // El correo electrónico ya está verificado
                 return res.json({ emailAlreadyVerified: true });
+            }
+        } else {
+            // La dirección de correo electrónico no existe en la base de datos
+            res.status(404).json({ message: 'Email address not found' });
+        }
+    } catch (error) {
+        res.status(500).send({ 'message': error.message })
+    }
+}
+
+
+export const verifyA2F = async (req, res) => {
+    const tokenVerify = req.token;
+
+    jwt.verify(tokenVerify, process.env.KEY, (error, authData) => {
+        if (error) return res.json({ value: false });
+    })
+    const tokenInfo = jwt.decode(tokenVerify, { complete: true })
+
+    const email = tokenInfo.payload.userMail;
+
+    try {
+        const connection = await getConnection();
+        const queryAsync = promisify(connection.query).bind(connection);
+
+        const result = await queryAsync(querys.checkEmail, [email]);
+
+        if (result.length > 0) {
+            // La dirección de correo electrónico existe en la base de datos
+            const user = result[0];
+
+            if (!user.twoFactorAuthEnabled) {
+                return res.json({ authTwoVerified: false });
+            } else {
+                // El correo electrónico ya está verificado
+                return res.json({ authTwoVerified: true });
             }
         } else {
             // La dirección de correo electrónico no existe en la base de datos

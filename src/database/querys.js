@@ -79,7 +79,8 @@ export const querys = {
         password = ?,
         userMail = ?,
         phoneNumber = ?,
-        emailVerified = ?
+        emailVerified = ?,
+        twoFactorAuthEnabled = ?
     WHERE userId = ?`,
 
     updateUserTheme: 
@@ -105,6 +106,22 @@ export const querys = {
     recoveryPassword: 
     `UPDATE users
         SET password = ?
+    WHERE userId = ?`,
+
+    updateVerificationCode: 
+    `UPDATE users
+        SET twoFactorAuthSecret = ?,
+            twoFactorAuthSecretUse = ?
+    WHERE userId = ?`,
+
+    enableA2F: 
+    `UPDATE users
+        SET twoFactorAuthEnabled = 1
+    WHERE userId = ?`,
+
+    disableA2F: 
+    `UPDATE users
+        SET twoFactorAuthEnabled = 0
     WHERE userId = ?`,
 }
 

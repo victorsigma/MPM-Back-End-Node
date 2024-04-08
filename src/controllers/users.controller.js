@@ -4,9 +4,75 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { promisify } from 'util';
 import { transporter } from "../libs/mailer";
+import { generateVerificationCode } from "../libs/utils";
+
+
+export const checkTwoFactorAuthentication = async (req, res) => {
+    const { userNameOrEmail, password } = req.body
+
+    if (userNameOrEmail == null || password == null) return res.status(400).send({ 'message': 'Bad Request' });
+
+    try {
+        // Aquí realizas la consulta para verificar si el usuario tiene habilitada la autenticación de dos factores
+        const pool = await getConnection();
+        const queryAsync = promisify(pool.query).bind(pool);
+
+        const validEmail = /^([\da-z_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/.test(userNameOrEmail)
+        let checkUser;
+        if (validEmail) {
+            //checkUser = await pool.request().input('userMail', sql.VarChar, userNameOrEmail).query(querys.checkEmail);
+            checkUser = await queryAsync(querys.checkEmail, [userNameOrEmail])
+        } else {
+            checkUser = await queryAsync(querys.checkUserName, [userNameOrEmail]);
+        }
+
+        const user = checkUser[0];
+
+        const isTwoFactorEnabled = user.twoFactorAuthEnabled;
+
+        bcrypt.compare(password, user.password).then(async (result) => {
+            if (result) {
+                // Si el usuario tiene habilitada la autenticación de dos factores, generas y envías el código de autenticación
+                if (isTwoFactorEnabled) {
+                    const verificationCode = generateVerificationCode();
+
+                    queryAsync(querys.updateVerificationCode, [verificationCode, false, user.userId])
+
+                    const verificationCodeEmailMessage = {
+                        from: '"MPM" <mpm@example.com>', // Dirección del remitente
+                        to: user.userMail, // Lista de destinatarios
+                        subject: "Código de Autenticación", // Asunto del correo
+                        text: "Código de autenticación", // Cuerpo del correo en texto plano
+                        html: `
+                            <div style="background-color: #1a1a1a; color: #ffffff; padding: 20px;">
+                                <h2 style="color: #f1c0ff;">Código de Autenticación</h2>
+                                <p>¡Hola!</p>
+                                <p>Aquí tienes tu código de autenticación:</p>
+                                <p><strong>${verificationCode}</strong></p>
+                                <p>Gracias,</p>
+                                <p>El equipo de MPM</p>
+                            </div>
+                        ` // Cuerpo del correo en formato HTML
+                    };
+                    
+                    await transporter.sendMail(verificationCodeEmailMessage);
+                    res.status(200).send({ 'message': 'Verification code sent' });
+                } else {
+                    // Si el usuario no tiene habilitada la autenticación de dos factores, continúas con el inicio de sesión normal
+                    return await login(req, res);
+                }
+            } else {
+                res.status(500).json({ 'message': 'Incorrect data' })
+            }
+        })
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send({ 'message': 'Internal server error' });
+    }
+};
 
 export const login = async (req, res) => {
-    const { userNameOrEmail, password } = req.body
+    const { userNameOrEmail, password, verificationCode } = req.body
     const isRemember = req.query.remember == 'true' ? true : false;
 
     if (userNameOrEmail == null || password == null) return res.status(400).send({ 'message': 'Bad Request' });
@@ -25,14 +91,31 @@ export const login = async (req, res) => {
         }
 
         const user = checkUser[0];
-
+        const isTwoFactorEnabled = user.twoFactorAuthEnabled;
 
         if (checkUser != undefined) {
             const selectedTheme = await queryAsync(querys.getTheme, [user.selectedTheme])
             bcrypt.compare(password, user.password).then((result) => {
+                const expiresIn = isRemember ? '30d' : '24h';
                 if (result) {
-
-                    if (!isRemember) {
+                    if (isTwoFactorEnabled) {
+                        
+                        if(verificationCode == user.twoFactorAuthSecret && !user.twoFactorAuthSecretUse) {
+                            queryAsync(querys.updateVerificationCode, [null, true, user.userId])
+                            jwt.sign({
+                                userName: user.userName,
+                                userMail: user.userMail,
+                                phoneNumber: user.phoneNumber,
+                                userIcon: user.userIcon,
+                                selectedTheme: selectedTheme[0].themeType
+    
+                            }, process.env.KEY, { expiresIn }, (err, token) => {
+                                res.json({ token })
+                            })
+                        } else {
+                            res.status(401).json({ 'message': 'The code could not be verified or has already been used.' })
+                        }
+                    } else {
                         jwt.sign({
                             userName: user.userName,
                             userMail: user.userMail,
@@ -40,24 +123,12 @@ export const login = async (req, res) => {
                             userIcon: user.userIcon,
                             selectedTheme: selectedTheme[0].themeType
 
-                        }, process.env.KEY, { expiresIn: '24h' }, (err, token) => {
-                            res.json({ token })
-                        })
-                    }
-                    else {
-                        jwt.sign({
-                            userName: user.userName,
-                            userMail: user.userMail,
-                            phoneNumber: user.phoneNumber,
-                            userIcon: user.userIcon,
-                            selectedTheme: selectedTheme[0].themeType
-
-                        }, process.env.KEY, { expiresIn: '30d' }, (err, token) => {
+                        }, process.env.KEY, { expiresIn }, (err, token) => {
                             res.json({ token })
                         })
                     }
                 } else {
-                    res.status(500).json({ 'message': 'Incorrect data' })
+                    res.status(401).json({ 'message': 'Incorrect data' })
                 }
             })
         }
@@ -178,13 +249,15 @@ export const updateUser = async (req, res) => {
 
             user.emailVerified = update.userMail !== undefined ? false : user.emailVerified;
 
+            user.twoFactorAuthEnabled = update.userMail !== undefined ? false : user.twoFactorAuthEnabled;
+
             user.phoneNumber = update.phoneNumber !== undefined ? update.phoneNumber : user.phoneNumber;
 
             const hashedPassword = update.password !== undefined ? await bcrypt.hash(update.password, 10) : user.password;
 
             user.password = hashedPassword;
 
-            await queryAsync(querys.updateUser, [user.userName, user.password, user.userMail, user.phoneNumber, user.emailVerified, user.userId]);
+            await queryAsync(querys.updateUser, [user.userName, user.password, user.userMail, user.phoneNumber, user.emailVerified, user.twoFactorAuthEnabled, user.userId]);
 
             const checkNewUser = await queryAsync(querys.getUserById, [user.userId]);
     
