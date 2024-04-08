@@ -100,33 +100,30 @@ export const deleteProjectHasUserById = async (req, res) => {
 }
 
 export const updateProjectHasUserById = async (req, res) => {
-    const { id } = req.params
-    const { Id, proyectsIdProject, userIdUser, rolesIdRol } = req.body
+    const user = req.query.user;
+    const project = req.query.project;
+    const { idRol } = req.body
+
+    
 
     if (
-        proyectsIdProject == null ||
-        userIdUser == null ||
-        rolesIdRol == null
+        idRol == null
     ) {
         return res.status(400).json({'message': 'Bad Request'});
     }
 
     try {
-        const pool = await getConnection();
-        await pool.request()
-        .input('id', id)
-        .input('proyectsIdProject', sql.VarChar, proyectsIdProject)
-        .input('userIdUser', sql.VarChar, userIdUser)
-        .input('rolesIdRol', sql.Int, rolesIdRol)
-        .query(querys.updateProjectHasUser);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
 
-        const result = await pool.request()
-        .input('id', Id)
-        .query(querys.getProjectHasUserById);
+        const checkUser = await queryAsync(querys.checkUserName, [user]);
 
-        res.json(result.recordset[0]);
+        await queryAsync(querys.updateProjectHasUser, [idRol, checkUser[0].userId, project]);
+
+        const result = await queryAsync(querys.getProjectHasUserById, [project, checkUser[0].userId]);
+
+        res.json(result[0]);
     } catch (error) {
-        res.status(500);
-        res.send({ 'message': error.message });
+        res.status(500).send({ 'message': error.message });
     }
 }

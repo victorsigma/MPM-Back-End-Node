@@ -38,7 +38,11 @@ export const querys = {
     WHERE u.userId = ? AND p.id = ?`,
 
     getActivityById: 'SELECT * FROM activities WHERE id = ?',
-    getProjectHasUserById: 'SELECT * FROM projectshasusers WHERE Id = ?',
+    getProjectHasUserById: `
+    SELECT u.userName, u.userIcon, r.rolName
+    FROM projectshasusers pu JOIN users u ON u.userId = pu.userIdUser JOIN rols r ON r.Id = pu.idRol
+    WHERE pu.proyectsIdProject = ? AND u.userId = ?
+    ORDER BY pu.idRol;`,
     getUserById: 'SELECT * FROM users WHERE userId = ?',
 
     deleteProject: 'DELETE FROM projects WHERE id = ?',
@@ -68,10 +72,8 @@ export const querys = {
 
     updateProjectHasUser: 
     `UPDATE projectshasusers
-        SET proyectsIdProject = ?, 
-        userIdUser = ?,
-        rolesIdRol = ?
-    WHERE Id = ?`,
+        SET idRol = ?
+    WHERE userIdUser = ? AND proyectsIdProject = ?`,
 
     updateUser: 
     `UPDATE users
