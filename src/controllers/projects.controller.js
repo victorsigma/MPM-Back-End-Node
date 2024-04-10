@@ -91,10 +91,10 @@ export const getProjectById = async (req, res) => {
 export const deleteProjectById = async (req, res) => {
     const { id } = req.params;
     try {
-        const pool = await getConnection();
-        await pool.request()
-        .input('id', id)
-        .query(querys.deleteProject);
+        const connection = await getConnection(); // Reemplaza con la función adecuada para obtener la conexión a MySQL
+        const queryAsync = promisify(connection.query).bind(connection);
+
+        await queryAsync(querys.deleteProject, [id]);
 
         res.sendStatus(204)
     } catch (error) {
